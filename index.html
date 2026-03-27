@@ -591,18 +591,18 @@ const INSURED_NAMES = [
 ];
 
 const COVERAGE_TYPES = [
-  { name: "General Liability", baseRate: 0.005, abbr: "GL" },
-  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O" },
-  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP" },
-  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS" },
-  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA" },
-  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC" },
-  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber" },
-  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O" },
-  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro" },
-  { name: "Product Liability", baseRate: 0.008, abbr: "PL" },
-  { name: "Inland Marine", baseRate: 0.005, abbr: "IM" },
-  { name: "Builders Risk", baseRate: 0.006, abbr: "BR" }
+  { name: "General Liability", baseRate: 0.005, abbr: "GL", exposureLabel: "Revenue" },
+  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O", exposureLabel: "Revenue" },
+  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP", exposureLabel: "TIV" },
+  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS", exposureLabel: "Underlying Premium" },
+  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA", exposureLabel: "Fleet Value" },
+  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC", exposureLabel: "Annual Payroll" },
+  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber", exposureLabel: "Revenue" },
+  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O", exposureLabel: "Total Assets" },
+  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro", exposureLabel: "TIV" },
+  { name: "Product Liability", baseRate: 0.008, abbr: "PL", exposureLabel: "Revenue" },
+  { name: "Inland Marine", baseRate: 0.005, abbr: "IM", exposureLabel: "TIV" },
+  { name: "Builders Risk", baseRate: 0.006, abbr: "BR", exposureLabel: "Project Value" }
 ];
 
 const INDUSTRIES = [
@@ -712,7 +712,7 @@ const CAT_EVENTS = [
 ];
 
 const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
-const RETENTION_OPTIONS = [5000, 10000, 25000, 50000, 100000, 250000, 500000];
+const RETENTION_OPTIONS = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
 
 // ====== GAME STATE ======
 let state = {
@@ -745,9 +745,9 @@ let state = {
 };
 
 const DIFFICULTY = {
-  easy:   { time: 40, rounds: 15, lossChance: 0.30, overpriceThreshold: 1.6, fireThreshold: 1.0 },
-  medium: { time: 28, rounds: 20, lossChance: 0.40, overpriceThreshold: 1.35, fireThreshold: 0.90 },
-  hard:   { time: 18, rounds: 25, lossChance: 0.50, overpriceThreshold: 1.2, fireThreshold: 0.80 }
+  easy:   { time: 40, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 1.0 },
+  medium: { time: 28, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.90 },
+  hard:   { time: 18, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.80 }
 };
 
 // ====== UTILITY ======
@@ -837,11 +837,11 @@ function generateSubmission() {
   if (currentCarrier === "Declined to disclose") riskScore += 0.1;
   if (currentCarrier === "None — new venture") riskScore += 0.05;
 
-  // Red/green flags - more red flags in this version
-  const numRedFlags = riskScore > 0.45 ? rand(1, 4) : (riskScore > 0.25 ? rand(0, 3) : rand(0, 1));
-  const numGreenFlags = riskScore < 0.35 ? rand(1, 3) : (riskScore < 0.55 ? rand(0, 1) : 0);
-  riskScore += numRedFlags * 0.07;
-  riskScore -= numGreenFlags * 0.05;
+  // Red/green flags — balanced distribution so good business shows up
+  const numRedFlags = riskScore > 0.5 ? rand(1, 3) : (riskScore > 0.3 ? rand(0, 2) : rand(0, 1));
+  const numGreenFlags = riskScore < 0.3 ? rand(2, 3) : (riskScore < 0.5 ? rand(0, 2) : rand(0, 1));
+  riskScore += numRedFlags * 0.06;
+  riskScore -= numGreenFlags * 0.06;
   riskScore = clamp(riskScore, 0.05, 0.95);
 
   const selectedRedFlags = pickN(RED_FLAGS, numRedFlags);
@@ -880,7 +880,7 @@ function generateSubmission() {
   const availableCarriers = selectCarriersForSubmission(industry, coverage, tiv, fairPremium);
 
   // Suggested limit and retention
-  const suggestedLimit = tiv < 2000000 ? 1000000 : (tiv < 10000000 ? 2000000 : 5000000);
+  const suggestedLimit = Math.min(tiv, tiv < 2000000 ? 1000000 : (tiv < 10000000 ? 2000000 : 5000000));
   const suggestedRetention = fairPremium < 20000 ? 10000 : (fairPremium < 50000 ? 25000 : 50000);
 
   return {
@@ -989,7 +989,7 @@ function renderSubmission(sub) {
         <span class="value">${sub.state.label} (${sub.state.name})</span>
       </div>
       <div class="risk-detail">
-        <span class="label">TIV</span>
+        <span class="label">${sub.coverage.exposureLabel}</span>
         <span class="value">${fmt(sub.tiv)}</span>
       </div>
       <div class="risk-detail">
@@ -1228,10 +1228,18 @@ function handleBind() {
 
   const selectedCarrier = sub.carriers[state.selectedCarrierIdx];
   const { premium, limit, retention } = getSelectedTerms();
+
+  // Adjust effective premium: carrier expects premium proportional to limit offered
+  // Lower limit = less coverage = carrier expects less premium = less commission for you
+  const limitFactor = clamp(limit / sub.suggestedLimit, 0.3, 2.0);
+  // Higher retention = less carrier exposure = slight premium credit
+  const retentionFactor = clamp(1 - (retention - sub.suggestedRetention) / (sub.fairPremium * 2), 0.7, 1.1);
+  const adjustedFairPremium = Math.round(sub.fairPremium * limitFactor * retentionFactor);
+
   const commission = Math.round(premium * selectedCarrier.carrier.commission);
 
-  // Overpricing check — insured shops elsewhere
-  const premiumRatio = premium / sub.fairPremium;
+  // Overpricing check — use adjusted fair premium for comparison
+  const premiumRatio = premium / adjustedFairPremium;
   if (premiumRatio > diff.overpriceThreshold && Math.random() < (premiumRatio - diff.overpriceThreshold) * 2) {
     state.totalDeclines++;
     state.badDeclines++;
@@ -1305,9 +1313,10 @@ function handleBind() {
 
   // Limit/retention feedback
   let termsFeedback = '';
-  if (limit > sub.tiv * 0.8) termsFeedback += ' High limit relative to TIV — significant exposure.';
-  if (retention < sub.fairPremium * 0.1) termsFeedback += ' Very low retention — you\'re absorbing small claims too.';
-  if (retention > sub.fairPremium * 1.5) termsFeedback += ' Generous retention — good risk transfer for the carrier.';
+  if (limit > sub.tiv * 0.8) termsFeedback += ' High limit relative to exposure — significant risk.';
+  if (limit < sub.suggestedLimit * 0.5) termsFeedback += ' Low limit — less exposure but less premium to earn.';
+  if (retention < adjustedFairPremium * 0.1) termsFeedback += ' Very low retention — absorbing small claims too.';
+  if (retention > adjustedFairPremium * 1.5) termsFeedback += ' Generous retention — good risk transfer for the carrier.';
 
   const expenses = Math.round(premium * 0.08); // expense ratio
   const netResult = commission - (lossOccurred && lossAmount > 0 ? Math.round(lossAmount * 0.12) : 0);
