@@ -197,6 +197,33 @@
   }
   .badge-coverage { color: var(--accent2); border-color: var(--accent2); }
   .badge-surplus { color: var(--orange); border-color: var(--orange); background: #fdf6e8; }
+  .badge-renewal { color: #5b3a8c; border-color: #5b3a8c; background: #f3eef8; }
+  .badge-financing { color: var(--accent2); border-color: var(--accent2); background: #eef1f6; }
+  .badge-broker { color: var(--text-dim); border-color: var(--border); font-weight: 500; font-style: italic; text-transform: none; letter-spacing: 0; }
+  .renewal-history {
+    background: #f3eef8;
+    border: 1px solid rgba(91,58,140,0.2);
+    border-radius: 6px;
+    padding: 0.5rem 0.6rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .renewal-history-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #5b3a8c; margin-bottom: 0.2rem; }
+  .risk-hint {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+    border: 1px dashed var(--border);
+    background: #fdf6e8;
+    color: var(--gold);
+  }
 
   .risk-details {
     display: grid;
@@ -372,6 +399,10 @@
   .decline-btn:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(181,36,42,0.25); }
   .refer-btn { background: var(--accent2); color: #fff; border-color: var(--accent); }
   .refer-btn:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(61,90,128,0.25); }
+  .lossruns-btn { background: #fdf6e8; color: var(--gold); border: 2px solid var(--gold); }
+  .lossruns-btn:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(154,123,46,0.2); }
+  .market-btn { background: var(--surface2); color: var(--text-dim); border: 2px dashed var(--border); }
+  .market-btn:hover:not(:disabled) { border-color: var(--accent2); color: var(--accent2); }
   .action-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
@@ -572,7 +603,7 @@
   </div>
   <button class="start-btn" onclick="startGame()">Start Placing</button>
   <div style="color: var(--text-dim); font-size: 0.75rem; max-width: 400px; line-height: 1.4;">
-    Keys: <b>1/2/3</b> select carrier &bull; <b>Arrow keys</b> adjust sliders &bull; <b>B</b> bind &bull; <b>D</b> decline &bull; <b>R</b> refer &bull; <b>Tab</b> cycle sliders &bull; <b>Space/Enter</b> next
+    Keys: <b>1/2/3</b> select carrier &bull; <b>Arrow keys</b> adjust sliders &bull; <b>B</b> bind &bull; <b>D</b> decline &bull; <b>R</b> refer &bull; <b>L</b> loss runs &bull; <b>M</b> market it &bull; <b>Tab</b> cycle sliders &bull; <b>Space/Enter</b> next
   </div>
 </div>
 
@@ -764,6 +795,24 @@ const CAT_EVENTS = [
 const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
 const RETENTION_OPTIONS = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
 
+const SL_TAX_RATES = { FL: 0.05, CA: 0.03, NY: 0.035, LA: 0.04 };
+
+const RETAIL_BROKER_NAMES = [
+  "Meridian Risk Group", "Crestline Insurance", "Broadstone Agency",
+  "Harborview Partners", "Ridgeline Brokers", "Cornerstone Risk",
+  "Clearwater Insurance", "Summit Partners", "Ironbridge Agency",
+  "Pinehurst Risk Advisors", "Redfield & Associates", "Keystone Brokerage",
+  "Lakewood Insurance Group", "Ashford Risk Services", "Briarcliff Agency"
+];
+
+const NONSTANDARD_CARRIERS = [
+  { name: "Surplus Specialty Group", rating: "B++", commission: 0.08 },
+  { name: "Coastal Underwriters", rating: "B+", commission: 0.07 },
+  { name: "Allied Risk Partners", rating: "A-", commission: 0.09 },
+  { name: "Frontier E&S Markets", rating: "B++", commission: 0.08 },
+  { name: "Beacon Specialty Insurance", rating: "B+", commission: 0.07 }
+];
+
 // ====== GAME STATE ======
 let state = {
   difficulty: 'medium',
@@ -790,6 +839,10 @@ let state = {
   history: [],
   achievements: [],
   carrierRelationships: {},
+  retailBrokers: {},
+  boundRisks: [],
+  lossRunsUsedThisRound: false,
+  marketItUsedThisRound: false,
   firedReason: null,
   activeSlider: 0 // 0=premium, 1=limit, 2=retention
 };
@@ -939,6 +992,9 @@ function generateSubmission() {
     : rawRetention < 25000 ? Math.round(rawRetention / 5000) * 5000
     : Math.round(rawRetention / 10000) * 10000;
 
+  // Pick a retail broker weighted by relationship score
+  const retailBroker = pickRetailBroker();
+
   return {
     name: pick(INSURED_NAMES),
     industry, coverage, state: loc,
@@ -953,8 +1009,116 @@ function generateSubmission() {
     carriers: availableCarriers,
     suggestedLimit,
     suggestedRetention,
-    isSurplus: loc.surplus || industry.riskMod > 1.3 || numRedFlags > 1
+    isSurplus: loc.surplus || industry.riskMod > 1.3 || numRedFlags > 1,
+    retailBroker,
+    isRenewal: false,
+    renewalData: null,
+    financingAvailable: fairPremium > 75000
   };
+}
+
+// ====== RENEWALS ======
+function generateRenewal() {
+  if (state.boundRisks.length === 0) return null;
+  const prior = pick(state.boundRisks);
+  const sub = { ...prior.sub };
+
+  // Update risk based on loss history
+  if (prior.lossOccurred && prior.lossAmount > 0) {
+    sub.riskScore = clamp(sub.riskScore + 0.08, 0.05, 0.95);
+    sub.fairPremium = Math.round(sub.fairPremium * 1.15 / 100) * 100; // rate increase
+  } else {
+    sub.riskScore = clamp(sub.riskScore - 0.05, 0.05, 0.95);
+    sub.fairPremium = Math.round(sub.fairPremium * 0.97 / 100) * 100; // slight credit
+  }
+  sub.lossChance = clamp(sub.riskScore * DIFFICULTY[state.difficulty].lossChance, 0.05, 0.90);
+
+  // Refresh carriers for current state
+  sub.carriers = selectCarriersForSubmission(sub.industry, sub.coverage, sub.tiv, sub.fairPremium);
+
+  // Renewal metadata
+  sub.isRenewal = true;
+  sub.renewalData = {
+    originalRound: prior.round,
+    priorPremium: prior.premium,
+    priorLimit: prior.limit,
+    priorRetention: prior.retention,
+    priorCarrier: prior.carrier,
+    hadLoss: prior.lossOccurred && prior.lossAmount > 0,
+    lossAmount: prior.lossAmount,
+    commissionDiscount: 0.85 // 15% retention credit on commission
+  };
+  sub.retailBroker = prior.sub.retailBroker || pickRetailBroker();
+  sub.financingAvailable = sub.fairPremium > 75000;
+  return sub;
+}
+
+// ====== RETAIL BROKERS ======
+function initRetailBrokers() {
+  state.retailBrokers = {};
+  RETAIL_BROKER_NAMES.forEach(n => {
+    state.retailBrokers[n] = { submissions: 0, binds: 0, declines: 0, score: 100 };
+  });
+}
+
+function pickRetailBroker() {
+  // Weight toward brokers with higher scores
+  const pool = RETAIL_BROKER_NAMES.filter(n => {
+    const rel = state.retailBrokers[n];
+    return !rel || rel.score > 20;
+  });
+  return pool.length > 0 ? pick(pool) : pick(RETAIL_BROKER_NAMES);
+}
+
+function updateRetailBroker(name, action) {
+  const rel = state.retailBrokers[name];
+  if (!rel) return;
+  rel.submissions++;
+  if (action === 'bind') { rel.binds++; rel.score = clamp(rel.score + 2, 0, 100); }
+  else if (action === 'decline') { rel.declines++; rel.score = clamp(rel.score - 8, 0, 100); }
+  else if (action === 'timeout') { rel.declines++; rel.score = clamp(rel.score - 12, 0, 100); }
+  else if (action === 'refer') { rel.score = clamp(rel.score - 3, 0, 100); }
+}
+
+function retailBrokerLabel(score) {
+  if (score >= 80) return { text: 'Strong', color: 'var(--green)' };
+  if (score >= 50) return { text: 'Good', color: 'var(--text-dim)' };
+  if (score >= 20) return { text: 'Cooling', color: 'var(--orange)' };
+  return { text: 'Lost', color: 'var(--red)' };
+}
+
+function generateDeclinationReason(carrier, industry, coverage, suspended, tivOk, premOk, appetiteScore) {
+  if (suspended) return pick([
+    'Relationship under review after recent losses',
+    'Under moratorium pending loss development',
+    'Authority suspended — too many adverse results'
+  ]);
+  if (!tivOk) {
+    if (state.activeCatEvent && state.activeCatEvent.lines.includes(coverage.name))
+      return `Reduced capacity for ${coverage.abbr} during ${state.activeCatEvent.name.toLowerCase()}`;
+    return pick([`Exceeds ${fmtShort(carrier.maxTIV)} capacity limit`, `Account too large for current treaty`]);
+  }
+  if (!premOk) return pick([
+    `Below ${fmtShort(carrier.minPremium)} minimum — account too small`,
+    `Doesn't meet minimum premium threshold this cycle`
+  ]);
+  if (appetiteScore === 0) {
+    if (industry.name === 'Cannabis') return pick([
+      'At capacity for cannabis this quarter',
+      'Regulatory uncertainty — pausing new cannabis submissions'
+    ]);
+    if (state.activeCatEvent) {
+      const ce = state.activeCatEvent;
+      if (ce.lines.includes(coverage.name)) return `Restricting new ${coverage.abbr} due to ${ce.name.toLowerCase()}`;
+      if (ce.states && ce.states.length > 0) return `Limiting ${industry.name.toLowerCase()} exposure post-${ce.name.toLowerCase()}`;
+    }
+    return pick([
+      `Not writing ${industry.name.toLowerCase()} this cycle`,
+      `${coverage.abbr} outside current appetite`,
+      `Capacity deployed elsewhere — check back Q${rand(1,4)}`
+    ]);
+  }
+  return pick(['No capacity this quarter', 'Fully deployed on this class']);
 }
 
 function selectCarriersForSubmission(industry, coverage, tiv, fairPremium) {
@@ -977,7 +1141,7 @@ function selectCarriersForSubmission(industry, coverage, tiv, fairPremium) {
       suspended,
       tivOk,
       premOk,
-      reason: suspended ? 'Relationship suspended' : (!tivOk ? `TIV exceeds ${fmtShort(c.maxTIV)} capacity` : (!premOk ? `Below ${fmtShort(c.minPremium)} minimum premium` : (appetiteScore === 0 ? 'Outside appetite' : 'No capacity')))
+      reason: generateDeclinationReason(c, industry, coverage, suspended, tivOk, premOk, appetiteScore)
     };
   });
 
@@ -1006,7 +1170,10 @@ function renderSubmission(sub) {
 
   const sliderMin = Math.round(sub.fairPremium * 0.3 / 100) * 100;
   const sliderMax = Math.round(sub.fairPremium * 2.5 / 100) * 100;
-  const sliderDefault = Math.round(sub.fairPremium * randf(0.6, 1.4) / 100) * 100;
+  // For renewals, default to prior premium; otherwise random around market
+  const sliderDefault = sub.isRenewal && sub.renewalData
+    ? Math.round(clamp(sub.renewalData.priorPremium, sliderMin, sliderMax) / 100) * 100
+    : Math.round(sub.fairPremium * randf(0.6, 1.4) / 100) * 100;
 
   function flagClass(val, thresholds) {
     if (val <= thresholds[0]) return 'flag-green';
@@ -1031,12 +1198,22 @@ function renderSubmission(sub) {
 
   card.innerHTML = `
     <div class="submission-header">
-      <div class="insured-name">${sub.name}</div>
+      <div class="insured-name">${sub.name}<span id="risk-hint-slot"></span></div>
       <div class="header-badges">
         <span class="badge badge-coverage">${sub.coverage.name}</span>
         ${sub.isSurplus ? '<span class="badge badge-surplus">SURPLUS LINES</span>' : ''}
+        ${sub.isRenewal ? '<span class="badge badge-renewal">RENEWAL</span>' : ''}
+        ${sub.financingAvailable ? '<span class="badge badge-financing">FINANCING AVAILABLE</span>' : ''}
+        ${sub.retailBroker ? `<span class="badge badge-broker">via ${sub.retailBroker}</span>` : ''}
       </div>
     </div>
+    ${sub.isRenewal && sub.renewalData ? `
+    <div class="renewal-history">
+      <div class="renewal-history-title">Renewal — Prior Term</div>
+      Bound round ${sub.renewalData.originalRound} with ${sub.renewalData.priorCarrier} at ${fmt(sub.renewalData.priorPremium)}.
+      ${sub.renewalData.hadLoss ? `<span style="color:var(--red)">Claim filed: ${fmt(sub.renewalData.lossAmount)}.</span> Expect rate increase.` : '<span style="color:var(--green)">Loss-free.</span> Retention credit applies.'}
+      Commission reduced to ~${Math.round(sub.renewalData.commissionDiscount * 100)}% of standard (retention credit).
+    </div>` : ''}
     <div class="risk-details">
       <div class="risk-detail">
         <span class="label">Industry</span>
@@ -1109,9 +1286,11 @@ function renderSubmission(sub) {
               `<span class="carrier-appetite appetite-none">${sc.reason}</span>`
             }
             <div class="carrier-relationship" style="color:${relLabel.color}">${relLabel.text} (${rel.score}/100)</div>
+            ${sub.isRenewal && sc.available ? '<div style="font-size:0.55rem;color:var(--gold);margin-top:0.1rem">Commission reduced (retention credit)</div>' : ''}
           </div>`;
         }).join('')}
       </div>
+      ${sub.carriers.filter(sc => sc.available).length === 0 ? '<button class="action-btn market-btn" id="market-btn" onclick="handleMarketIt()" style="margin-top:0.5rem;max-width:none">Market It (M) — find a non-standard carrier</button>' : ''}
     </div>
 
     <div class="controls-row">
@@ -1139,6 +1318,7 @@ function renderSubmission(sub) {
     <div class="action-buttons">
       <button class="action-btn bind-btn" id="bind-btn" onclick="handleBind()" disabled>Bind (B)</button>
       <button class="action-btn refer-btn" id="refer-btn" onclick="handleRefer()" disabled>Refer (R)</button>
+      <button class="action-btn lossruns-btn" id="lossruns-btn" onclick="handleLossRuns()">Loss Runs (L)</button>
       <button class="action-btn decline-btn" onclick="handleDecline()">Decline (D)</button>
     </div>
   `;
@@ -1277,6 +1457,76 @@ function getSelectedTerms() {
   return { premium, limit, retention };
 }
 
+function handleLossRuns() {
+  if (state.lossRunsUsedThisRound) return;
+  state.lossRunsUsedThisRound = true;
+  const cost = rand(5, 8);
+  state.timeLeft = Math.max(0, state.timeLeft - cost);
+  updateTimerDisplay();
+
+  const sub = state.currentSubmission;
+  let hint, hintColor;
+  if (sub.riskScore < 0.25) { hint = 'LOW RISK'; hintColor = 'color:var(--green)'; }
+  else if (sub.riskScore < 0.5) { hint = 'MODERATE RISK'; hintColor = 'color:var(--gold)'; }
+  else if (sub.riskScore < 0.7) { hint = 'HIGH RISK'; hintColor = 'color:var(--orange)'; }
+  else { hint = 'VERY HIGH RISK'; hintColor = 'color:var(--red)'; }
+
+  const slot = document.getElementById('risk-hint-slot');
+  if (slot) slot.innerHTML = `<span class="risk-hint" style="${hintColor}">${hint}</span>`;
+  const btn = document.getElementById('lossruns-btn');
+  if (btn) { btn.disabled = true; btn.textContent = `Loss Runs (-${cost}s)`; }
+}
+
+function handleMarketIt() {
+  if (state.marketItUsedThisRound) return;
+  state.marketItUsedThisRound = true;
+  const cost = rand(8, 10);
+  state.timeLeft = Math.max(0, state.timeLeft - cost);
+  updateTimerDisplay();
+
+  const sub = state.currentSubmission;
+  const ns = pick(NONSTANDARD_CARRIERS);
+  // Create a carrier entry compatible with the existing system
+  const newCarrier = {
+    carrier: { ...ns, appetite: {}, maxTIV: 999999999, minPremium: Math.round(sub.fairPremium * 0.4) },
+    appetiteScore: 1,
+    available: true,
+    suspended: false,
+    tivOk: true,
+    premOk: true,
+    reason: ''
+  };
+
+  // Replace the first unavailable carrier slot
+  const replaceIdx = sub.carriers.findIndex(sc => !sc.available);
+  if (replaceIdx >= 0) {
+    sub.carriers[replaceIdx] = newCarrier;
+  } else {
+    sub.carriers.push(newCarrier);
+  }
+
+  // Re-render the carrier section and enable buttons
+  const btn = document.getElementById('market-btn');
+  if (btn) { btn.disabled = true; btn.textContent = `Marketed (-${cost}s)`; }
+
+  // Dynamically update the carrier card
+  const cards = document.querySelectorAll('.carrier-card');
+  if (replaceIdx >= 0 && cards[replaceIdx]) {
+    const cardEl = cards[replaceIdx];
+    cardEl.classList.remove('unavailable');
+    cardEl.innerHTML = `
+      <div class="carrier-name">${ns.name}</div>
+      <div class="carrier-detail">Rating: <span>${ns.rating}</span> &bull; Commission: <span>${Math.round(ns.commission * 100)}%</span></div>
+      <div class="carrier-detail"><span style="color:var(--orange)">Non-standard market</span></div>
+      <span class="carrier-appetite appetite-medium">MARKETED</span>
+    `;
+    cardEl.onclick = () => selectCarrier(replaceIdx);
+  }
+
+  // Hide the prompt since there's now an available carrier
+  document.getElementById('carrier-prompt').classList.remove('active');
+}
+
 function handleBind() {
   stopTimer();
   const sub = state.currentSubmission;
@@ -1294,7 +1544,11 @@ function handleBind() {
   const retentionFactor = clamp(1 - (retention - sub.suggestedRetention) / (sub.fairPremium * 2), 0.7, 1.1);
   const adjustedFairPremium = Math.round(sub.fairPremium * limitFactor * retentionFactor);
 
-  const commission = Math.round(premium * selectedCarrier.carrier.commission);
+  // Renewal commission discount
+  const commRate = sub.isRenewal && sub.renewalData
+    ? selectedCarrier.carrier.commission * sub.renewalData.commissionDiscount
+    : selectedCarrier.carrier.commission;
+  const commission = Math.round(premium * commRate);
 
   // Overpricing check — use adjusted fair premium for comparison
   const premiumRatio = premium / adjustedFairPremium;
@@ -1409,12 +1663,14 @@ function handleBind() {
   else state.goodBinds++;
 
   updateCarrierRelationship(selectedCarrier.carrier.name, lossOccurred && lossAmount > 0, lossAmount, premium);
+  if (sub.retailBroker) updateRetailBroker(sub.retailBroker, 'bind');
 
   state.history.push({
     action: 'bind', sub, premium, limit, retention,
     carrier: selectedCarrier.carrier.name,
     commission, lossOccurred, lossAmount, netResult
   });
+  state.boundRisks.push({ sub, premium, limit, retention, carrier: selectedCarrier.carrier.name, lossOccurred, lossAmount, round: state.round });
   updateHUD();
 
   // Check for firing
@@ -1432,10 +1688,11 @@ function handleBind() {
     detail: `${lossStr ? lossStr + '<br><br>' : ''}${pricingFeedback}${termsFeedback}`,
     breakdown: {
       'Carrier': selectedCarrier.carrier.name,
-      'Commission': fmt(commission),
+      'Commission': fmt(commission) + (sub.isRenewal ? ' (renewal)' : ''),
       'Limit': fmtShort(limit),
       'Retention': fmtShort(retention),
       ...(lossOccurred && lossAmount > 0 ? { 'Loss': fmt(lossAmount) } : {}),
+      ...(sub.state.surplus && SL_TAX_RATES[sub.state.name] ? (() => { const slKey = 'SL Tax (' + sub.state.name + ')'; const slAmt = Math.round(premium * SL_TAX_RATES[sub.state.name]); return { [slKey]: fmt(slAmt), 'Total to Insured': fmt(premium + slAmt) }; })() : {}),
       'Net': fmt(netResult)
     },
     score: netResult,
@@ -1475,6 +1732,7 @@ function handleRefer() {
   }
 
   state.revenue += totalImpact;
+  if (sub.retailBroker) updateRetailBroker(sub.retailBroker, 'refer');
   state.history.push({ action: 'refer', sub, scoreImpact: totalImpact, wouldBind });
   updateHUD();
 
@@ -1520,6 +1778,7 @@ function handleDecline() {
 
   state.revenue += scoreImpact;
   state.totalDeclines++;
+  if (sub.retailBroker) updateRetailBroker(sub.retailBroker, 'decline');
   state.history.push({ action: 'decline', sub, scoreImpact, wouldHaveLost });
   updateHUD();
 
@@ -1538,6 +1797,7 @@ function handleTimeout() {
   state.badDeclines++;
   const penalty = -Math.round(sub.fairPremium * 0.05);
   state.revenue += penalty;
+  if (sub.retailBroker) updateRetailBroker(sub.retailBroker, 'timeout');
   state.history.push({ action: 'timeout', sub, scoreImpact: penalty });
   updateHUD();
 
@@ -1604,7 +1864,11 @@ function startGame() {
   state.history = [];
   state.achievements = [];
   state.firedReason = null;
+  state.boundRisks = [];
+  state.lossRunsUsedThisRound = false;
+  state.marketItUsedThisRound = false;
   initCarrierRelationships();
+  initRetailBrokers();
 
   document.getElementById('event-banner').classList.remove('active');
   document.getElementById('lr-warning').classList.remove('active');
@@ -1621,9 +1885,18 @@ function nextRound() {
   }
 
   state.round++;
+  state.lossRunsUsedThisRound = false;
+  state.marketItUsedThisRound = false;
   maybeTriggerCatEvent();
-  state.currentSubmission = generateSubmission();
-  renderSubmission(state.currentSubmission);
+
+  // After round 10, 40% chance of a renewal if we have bound risks
+  let sub = null;
+  if (state.round > 10 && state.boundRisks.length > 0 && Math.random() < 0.4) {
+    sub = generateRenewal();
+  }
+  if (!sub) sub = generateSubmission();
+  state.currentSubmission = sub;
+  renderSubmission(sub);
   updateHUD();
   startTimer();
 }
@@ -1674,12 +1947,28 @@ function endGame() {
   if (burnedCarrier) ach.push(`Burned ${burnedCarrier[0].split(' ')[0]} — Relationship destroyed`);
   state.achievements = ach;
 
+  // Check for lost retail brokers
+  const lostBrokers = Object.entries(state.retailBrokers).filter(([_, r]) => r.score <= 20 && r.submissions > 0);
+  if (lostBrokers.length >= 3) ach.push('Blacklisted — Lost 3+ retail relationships');
+  const strongBrokers = Object.entries(state.retailBrokers).filter(([_, r]) => r.score >= 80 && r.submissions >= 3);
+  if (strongBrokers.length >= 3) ach.push('Trusted Partner — 3+ strong retail relationships');
+
   // Carrier report
   const carrierReport = Object.entries(state.carrierRelationships)
     .filter(([_, r]) => r.binds > 0)
     .map(([name, r]) => {
       const label = carrierRelationshipLabel(r.score);
       return `<div class="fb-item"><span class="fb-label">${name.split('(')[0].trim()}</span><span class="fb-val" style="color:${label.color}">${r.binds} binds, ${r.losses} losses (${r.score}/100)</span></div>`;
+    }).join('');
+
+  // Retail broker report
+  const brokerReport = Object.entries(state.retailBrokers)
+    .filter(([_, r]) => r.submissions > 0)
+    .sort((a, b) => b[1].submissions - a[1].submissions)
+    .slice(0, 6)
+    .map(([name, r]) => {
+      const label = retailBrokerLabel(r.score);
+      return `<div class="fb-item"><span class="fb-label">${name}</span><span class="fb-val" style="color:${label.color}">${r.binds}/${r.submissions} bound (${label.text})</span></div>`;
     }).join('');
 
   const screen = document.getElementById('gameover-screen');
@@ -1718,6 +2007,11 @@ function endGame() {
     <div style="max-width: 550px; width: 100%;">
       <p style="color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em;">Carrier Relationships</p>
       <div class="feedback-breakdown">${carrierReport}</div>
+    </div>` : ''}
+    ${brokerReport ? `
+    <div style="max-width: 550px; width: 100%;">
+      <p style="color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em;">Retail Broker Relationships</p>
+      <div class="feedback-breakdown">${brokerReport}</div>
     </div>` : ''}
     ${ach.length ? `
     <div>
@@ -1764,6 +2058,8 @@ document.addEventListener('keydown', e => {
   else if ((e.key === 'b' || e.key === 'B') && state.selectedCarrierIdx >= 0) handleBind();
   else if (e.key === 'd' || e.key === 'D') handleDecline();
   else if ((e.key === 'r' || e.key === 'R') && state.selectedCarrierIdx >= 0) handleRefer();
+  else if (e.key === 'l' || e.key === 'L') handleLossRuns();
+  else if (e.key === 'm' || e.key === 'M') handleMarketIt();
 
   // Tab to cycle sliders
   else if (e.key === 'Tab') {
