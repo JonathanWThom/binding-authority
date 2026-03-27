@@ -545,7 +545,7 @@
       <button class="diff-btn" data-diff="hard">MGA (Hard)</button>
     </div>
   </div>
-  <button class="start-btn" onclick="startGame()">Start Underwriting</button>
+  <button class="start-btn" onclick="startGame()">Start Placing</button>
   <div style="color: var(--text-dim); font-size: 0.75rem; max-width: 400px; line-height: 1.4;">
     Keys: <b>1/2/3</b> select carrier &bull; <b>Arrow keys</b> adjust sliders &bull; <b>B</b> bind &bull; <b>D</b> decline &bull; <b>R</b> refer &bull; <b>Tab</b> cycle sliders &bull; <b>Space/Enter</b> next
   </div>
@@ -1608,7 +1608,7 @@ function endGame() {
   if (state.badDeclines === 0 && state.totalDeclines > 0) ach.push('No Regrets — Every decline was justified');
   if (bindRate > 0.7 && lr < 0.5) ach.push('Volume Player — High bind rate, controlled losses');
   if (state.totalRefers > 3) ach.push('Team Player — Used referrals wisely');
-  if (cr < 0.6 && state.totalBinds > 5) ach.push('Underwriting Profit — Combined ratio under 60%');
+  if (cr < 0.6 && state.totalBinds > 5) ach.push('Profitable Book — Combined ratio under 60%');
   if (state.firedReason) ach.push('Fired — Better luck next time');
   // Check if any carrier relationship is at 0
   const burnedCarrier = Object.entries(state.carrierRelationships).find(([_, r]) => r.score < 10 && r.binds > 0);
@@ -1628,7 +1628,7 @@ function endGame() {
     <h1>${state.firedReason ? 'You\'re Fired!' : 'Game Over'}</h1>
     ${state.firedReason ? `<p style="color: var(--red); max-width: 400px; font-size: 0.9rem;">${state.firedReason}</p>` : ''}
     <div class="grade-display" style="color: ${gradeColor}">${grade}</div>
-    <div class="grade-label">Underwriter Grade (Round ${state.round}/${state.totalRounds})</div>
+    <div class="grade-label">Broker Grade (Round ${state.round}/${state.totalRounds})</div>
     <div class="final-stats">
       <div class="final-stat">
         <div class="label">Total Revenue</div>
@@ -1759,7 +1759,7 @@ function renderShareImage(grade, revenue, lr, cr, binds, accuracy, difficulty, f
   ctx.fillStyle = '#7a8599';
   ctx.font = '500 16px Inter, system-ui, sans-serif';
   const diffLabel = difficulty === 'easy' ? 'Retail' : difficulty === 'medium' ? 'Wholesale' : 'MGA';
-  ctx.fillText(`Underwriter Grade — ${diffLabel} Difficulty`, W/2, 290);
+  ctx.fillText(`Broker Grade — ${diffLabel} Difficulty`, W/2, 290);
 
   // Stats row
   const stats = [
@@ -1849,7 +1849,7 @@ async function shareResults(grade, revenue, lr, cr, binds, accuracy, difficulty,
   const file = new File([blob], 'binding-authority-results.png', { type: 'image/png' });
 
   const diffLabel = difficulty === 'easy' ? 'Retail' : difficulty === 'medium' ? 'Wholesale' : 'MGA';
-  const shareText = `I scored ${grade} on The Binding Authority (${diffLabel} mode)! Revenue: $${Math.round(revenue).toLocaleString()} | Loss Ratio: ${lr}\n\nThink you can underwrite better?`;
+  const shareText = `I scored ${grade} on The Binding Authority (${diffLabel} mode)! Revenue: $${Math.round(revenue).toLocaleString()} | Loss Ratio: ${lr}\n\nThink you can place better?`;
 
   if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
@@ -1882,7 +1882,7 @@ function copyTextResults(grade, revenue, lr, cr, binds, accuracy, difficulty, fi
     `Loss Ratio: ${lr} | Combined: ${cr}`,
     `Risks Bound: ${binds} | Accuracy: ${accuracy}`,
     ``,
-    `Think you can underwrite better?`,
+    `Think you can place better?`,
     `jonathanwthom.github.io/binding-authority`
   ].join('\n');
 
