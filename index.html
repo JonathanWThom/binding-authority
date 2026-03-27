@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Binding Authority</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #131a2e;
+    --surface2: #1a2340;
+    --accent: #4f8cff;
+    --accent2: #6c5ce7;
+    --green: #00b894;
+    --red: #e74c3c;
+    --orange: #f39c12;
+    --gold: #ffd700;
+    --text: #e8eaf0;
+    --text-dim: #7a8599;
+    --border: #2a3555;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ---- TITLE SCREEN ---- */
+  #title-screen {
+    text-align: center;
+    gap: 2rem;
+    background: radial-gradient(ellipse at 50% 30%, #1a2a50 0%, var(--bg) 70%);
+  }
+  #title-screen h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  #title-screen .subtitle {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    max-width: 500px;
+    line-height: 1.5;
+  }
+  .start-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 1rem 3rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+  }
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(79,140,255,0.3); }
+
+  .difficulty-select {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .diff-btn {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .diff-btn:hover, .diff-btn.selected {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  /* ---- GAME SCREEN ---- */
+  #game-screen {
+    justify-content: flex-start;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 700px;
+  }
+  .hud-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+  }
+  .hud-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+  .hud-value { font-size: 1.3rem; font-weight: 800; margin-top: 0.15rem; }
+  .hud-value.money { color: var(--green); }
+  .hud-value.loss-ratio { color: var(--accent); }
+  .hud-value.timer { color: var(--orange); }
+  .hud-value.round { color: var(--accent2); }
+
+  .timer-bar-container {
+    width: 100%;
+    max-width: 700px;
+    height: 6px;
+    background: var(--surface);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--orange), var(--green));
+    border-radius: 3px;
+    transition: width 0.1s linear;
+  }
+
+  .submission-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 700px;
+    position: relative;
+    overflow: hidden;
+  }
+  .submission-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .submission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .insured-name { font-size: 1.3rem; font-weight: 800; }
+  .coverage-type {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .risk-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+  .risk-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.7rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  .risk-detail .label { color: var(--text-dim); }
+  .risk-detail .value { font-weight: 600; }
+  .risk-detail .value.flag-red { color: var(--red); }
+  .risk-detail .value.flag-yellow { color: var(--orange); }
+  .risk-detail .value.flag-green { color: var(--green); }
+
+  .red-flags {
+    background: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    border-radius: 10px;
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+  .red-flags-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--red);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .red-flags-list {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .green-flags {
+    background: rgba(0, 184, 148, 0.08);
+    border: 1px solid rgba(0, 184, 148, 0.2);
+    border-radius: 10px;
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+  .green-flags-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .green-flags-list {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .premium-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+  }
+  .premium-label { font-weight: 600; font-size: 0.9rem; }
+  .premium-slider-wrap { flex: 1; min-width: 200px; }
+  .premium-slider {
+    width: 100%;
+    accent-color: var(--accent);
+    height: 6px;
+  }
+  .premium-display {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--green);
+    min-width: 100px;
+    text-align: right;
+  }
+  .premium-hint {
+    width: 100%;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: -0.3rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .action-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .action-btn:hover { transform: translateY(-2px); }
+  .action-btn:active { transform: translateY(0); }
+  .bind-btn { background: linear-gradient(135deg, #00b894, #00a381); color: white; }
+  .bind-btn:hover { box-shadow: 0 6px 20px rgba(0,184,148,0.3); }
+  .decline-btn { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+  .decline-btn:hover { box-shadow: 0 6px 20px rgba(231,76,60,0.3); }
+
+  /* Feedback overlay */
+  .feedback-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: rgba(10,14,26,0.7);
+    backdrop-filter: blur(4px);
+  }
+  .feedback-overlay.active { display: flex; }
+  .feedback-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+  }
+  .feedback-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+  .feedback-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .feedback-detail { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem; }
+  .feedback-score { font-size: 1.5rem; font-weight: 800; }
+  .feedback-score.positive { color: var(--green); }
+  .feedback-score.negative { color: var(--red); }
+  .next-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.7rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    margin-top: 0.8rem;
+    transition: all 0.15s;
+  }
+  .next-btn:hover { border-color: var(--accent); }
+
+  /* Event banner */
+  .event-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    color: white;
+    text-align: center;
+    padding: 0.8rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    z-index: 90;
+    transform: translateY(-100%);
+    transition: transform 0.4s ease;
+  }
+  .event-banner.active { transform: translateY(0); }
+
+  /* ---- GAME OVER ---- */
+  #gameover-screen {
+    text-align: center;
+    gap: 1.5rem;
+    background: radial-gradient(ellipse at 50% 30%, #1a2a50 0%, var(--bg) 70%);
+    padding: 2rem;
+  }
+  #gameover-screen h1 { font-size: 2.5rem; font-weight: 900; }
+  .final-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    max-width: 400px;
+    width: 100%;
+  }
+  .final-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .final-stat .label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .final-stat .value { font-size: 1.5rem; font-weight: 800; margin-top: 0.3rem; }
+
+  .grade-display {
+    font-size: 5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .grade-label { font-size: 1rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+  .achievements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    max-width: 500px;
+  }
+  .achievement {
+    background: var(--surface);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  /* Cat event flash */
+  @keyframes catFlash {
+    0%, 100% { opacity: 0; }
+    10%, 90% { opacity: 1; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .hud { grid-template-columns: repeat(2, 1fr); }
+    .risk-details { grid-template-columns: 1fr; }
+    .submission-card { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen" class="screen active">
+  <h1>The Binding<br>Authority</h1>
+  <p class="subtitle">You're a wholesale broker with binding authority. Evaluate submissions, set premiums, and manage your book. Watch the loss ratio or get fired.</p>
+  <div>
+    <p style="color: var(--text-dim); margin-bottom: 0.6rem; font-size: 0.85rem;">Difficulty</p>
+    <div class="difficulty-select">
+      <button class="diff-btn" data-diff="easy">Retail (Easy)</button>
+      <button class="diff-btn selected" data-diff="medium">Wholesale (Normal)</button>
+      <button class="diff-btn" data-diff="hard">Lloyd's (Hard)</button>
+    </div>
+  </div>
+  <button class="start-btn" onclick="startGame()">Start Underwriting</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="hud">
+    <div class="hud-item">
+      <div class="hud-label">Revenue</div>
+      <div class="hud-value money" id="hud-revenue">$0</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Loss Ratio</div>
+      <div class="hud-value loss-ratio" id="hud-loss-ratio">0%</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Round</div>
+      <div class="hud-value round" id="hud-round">1 / 20</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">Time</div>
+      <div class="hud-value timer" id="hud-timer">30s</div>
+    </div>
+  </div>
+
+  <div class="timer-bar-container">
+    <div class="timer-bar" id="timer-bar"></div>
+  </div>
+
+  <div class="submission-card" id="submission-card"></div>
+
+  <div class="feedback-overlay" id="feedback-overlay">
+    <div class="feedback-card" id="feedback-card"></div>
+  </div>
+</div>
+
+<!-- EVENT BANNER -->
+<div class="event-banner" id="event-banner"></div>
+
+<!-- GAME OVER SCREEN -->
+<div id="gameover-screen" class="screen"></div>
+
+<script>
+// ====== DATA ======
+const INSURED_NAMES = [
+  "Gulf Coast Hospitality Group", "Apex Manufacturing LLC", "Redwood Timber Co.",
+  "Pinnacle Construction Inc.", "Harbor View Marina", "Lone Star Energy Partners",
+  "Summit Healthcare Systems", "Pacific Rim Imports", "Cascade Adventure Tours",
+  "Metro Transit Authority", "Ironclad Security Services", "Brightfield Solar Farms",
+  "Northwind Logistics", "Tidal Wave Surf Co.", "Greystone Property Holdings",
+  "Falcon Air Charter", "Blue Ridge Distillery", "Coral Bay Resorts",
+  "Thunderbolt Electric", "Prairie Land Ag Solutions", "Skyline Tower Management",
+  "Riverbend Cannabis Co.", "Atlas Heavy Industries", "Sapphire Coast Fishing Fleet",
+  "Canyon Rock Quarry", "Velvet Rope Nightclubs", "Pioneer Oilfield Services",
+  "Emerald City Tech Hub", "Silver Creek Ranch", "Obsidian Data Centers",
+  "Wildfire BBQ Chain", "Glacier Point Ski Resort", "Sandcastle Beach Properties",
+  "Pegasus Air Cargo", "Golden Gate Vineyards", "Rust Belt Recycling",
+  "Neptune Deep Sea Mining", "Crimson Tide Marine Transport", "High Voltage Studios",
+  "Sunrise Senior Living", "Brickyard Auto Racing", "Cloud Nine Aviation",
+  "Desert Rose Cannabis Farms", "Whitewater Rafting Adventures", "Iron Horse Railway Tours"
+];
+
+const COVERAGE_TYPES = [
+  { name: "General Liability", baseRate: 0.005 },
+  { name: "Professional Liability (E&O)", baseRate: 0.008 },
+  { name: "Commercial Property", baseRate: 0.004 },
+  { name: "Excess/Umbrella", baseRate: 0.003 },
+  { name: "Commercial Auto", baseRate: 0.006 },
+  { name: "Workers' Compensation", baseRate: 0.007 },
+  { name: "Cyber Liability", baseRate: 0.01 },
+  { name: "Directors & Officers (D&O)", baseRate: 0.009 },
+  { name: "Environmental Liability", baseRate: 0.012 },
+  { name: "Product Liability", baseRate: 0.008 },
+  { name: "Inland Marine", baseRate: 0.005 },
+  { name: "Builders Risk", baseRate: 0.006 }
+];
+
+const INDUSTRIES = [
+  { name: "Construction", riskMod: 1.4 },
+  { name: "Manufacturing", riskMod: 1.2 },
+  { name: "Hospitality", riskMod: 1.1 },
+  { name: "Healthcare", riskMod: 1.3 },
+  { name: "Technology", riskMod: 0.8 },
+  { name: "Real Estate", riskMod: 0.9 },
+  { name: "Transportation", riskMod: 1.5 },
+  { name: "Energy / Oil & Gas", riskMod: 1.6 },
+  { name: "Cannabis", riskMod: 1.8 },
+  { name: "Agriculture", riskMod: 1.2 },
+  { name: "Entertainment / Events", riskMod: 1.3 },
+  { name: "Marine", riskMod: 1.4 },
+  { name: "Aviation", riskMod: 1.7 },
+  { name: "Mining", riskMod: 1.6 },
+  { name: "Food & Beverage", riskMod: 1.0 },
+  { name: "Retail", riskMod: 0.7 },
+  { name: "Professional Services", riskMod: 0.6 }
+];
+
+const STATES = [
+  { name: "FL", catRisk: 1.5, label: "Florida" },
+  { name: "CA", catRisk: 1.3, label: "California" },
+  { name: "TX", catRisk: 1.2, label: "Texas" },
+  { name: "LA", catRisk: 1.4, label: "Louisiana" },
+  { name: "NY", catRisk: 0.8, label: "New York" },
+  { name: "IL", catRisk: 0.9, label: "Illinois" },
+  { name: "OH", catRisk: 0.7, label: "Ohio" },
+  { name: "CO", catRisk: 0.8, label: "Colorado" },
+  { name: "WA", catRisk: 0.7, label: "Washington" },
+  { name: "NC", catRisk: 1.1, label: "North Carolina" },
+  { name: "OK", catRisk: 1.3, label: "Oklahoma" },
+  { name: "AZ", catRisk: 0.9, label: "Arizona" }
+];
+
+const RED_FLAGS = [
+  "Prior carrier non-renewed for frequency",
+  "3 large claims in last 5 years",
+  "Ongoing litigation against the insured",
+  "OSHA violations last 12 months",
+  "Failed last fire inspection",
+  "CEO under federal investigation",
+  "Operating without required permits",
+  "Previous arson investigation (inconclusive)",
+  "Significant accounts receivable aging >90 days",
+  "Key employee turnover >40% annually",
+  "No formal safety program in place",
+  "Located in flood zone, no flood policy",
+  "Material misrepresentation on prior application",
+  "Retroactive date gap in E&O coverage",
+  "Unlicensed subcontractors on projects",
+  "Multiple DOT violations",
+  "Delinquent premium payments with prior carrier",
+  "Cyber breach in last 24 months, no remediation plan",
+  "Product recall in last 3 years",
+  "Environmental cleanup order pending"
+];
+
+const GREEN_FLAGS = [
+  "Loss-free for 5+ years",
+  "Dedicated risk management team",
+  "ISO 9001 certified",
+  "Long-standing carrier relationships",
+  "Strong financials (A+ Dun & Bradstreet)",
+  "Comprehensive safety training program",
+  "Sprinklered building with central alarm",
+  "No prior claims in this line of coverage",
+  "SOC 2 Type II certified",
+  "Board-level risk committee",
+  "Formal incident response plan in place",
+  "Unionized workforce with low turnover",
+  "Recently upgraded all electrical/plumbing systems",
+  "Multi-year retention with current carrier",
+  "Fleet equipped with telematics and dashcams"
+];
+
+const CAT_EVENTS = [
+  { name: "Hurricane Warning", states: ["FL", "LA", "TX", "NC"], lines: ["Commercial Property", "Builders Risk"], premiumMod: 1.5, lossChanceMod: 2.0 },
+  { name: "Wildfire Season", states: ["CA", "CO", "WA", "AZ"], lines: ["Commercial Property", "Inland Marine"], premiumMod: 1.4, lossChanceMod: 1.8 },
+  { name: "Cyber Attack Wave", states: null, lines: ["Cyber Liability", "Professional Liability (E&O)"], premiumMod: 1.3, lossChanceMod: 1.6 },
+  { name: "Tort Reform Reversal", states: null, lines: ["General Liability", "Product Liability", "Professional Liability (E&O)"], premiumMod: 1.2, lossChanceMod: 1.4 },
+  { name: "Tornado Outbreak", states: ["OK", "TX", "IL", "OH"], lines: ["Commercial Property"], premiumMod: 1.6, lossChanceMod: 2.2 },
+  { name: "Nuclear Verdict Trend", states: null, lines: ["Commercial Auto", "General Liability", "Excess/Umbrella"], premiumMod: 1.3, lossChanceMod: 1.5 },
+  { name: "Pandemic Resurgence", states: null, lines: ["Workers' Compensation", "Directors & Officers (D&O)"], premiumMod: 1.2, lossChanceMod: 1.3 }
+];
+
+// ====== GAME STATE ======
+let state = {
+  difficulty: 'medium',
+  round: 0,
+  totalRounds: 20,
+  revenue: 0,
+  totalPremium: 0,
+  totalLosses: 0,
+  totalBinds: 0,
+  totalDeclines: 0,
+  goodBinds: 0,
+  badBinds: 0,
+  goodDeclines: 0,
+  badDeclines: 0,
+  timePerRound: 30,
+  timeLeft: 30,
+  timerInterval: null,
+  currentSubmission: null,
+  activeCatEvent: null,
+  catEventRoundsLeft: 0,
+  history: [],
+  achievements: []
+};
+
+const DIFFICULTY = {
+  easy:   { time: 45, rounds: 15, lossChance: 0.25, premiumForgiveness: 0.2 },
+  medium: { time: 30, rounds: 20, lossChance: 0.35, premiumForgiveness: 0.1 },
+  hard:   { time: 20, rounds: 25, lossChance: 0.45, premiumForgiveness: 0.05 }
+};
+
+// ====== UTILITY ======
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randf(min, max) { return Math.random() * (max - min) + min; }
+function fmt(n) { return '$' + n.toLocaleString(); }
+function pct(n) { return Math.round(n * 100) + '%'; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ====== DIFFICULTY SELECT ======
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.difficulty = btn.dataset.diff;
+  });
+});
+
+// ====== GENERATE SUBMISSION ======
+function generateSubmission() {
+  const industry = pick(INDUSTRIES);
+  const coverage = pick(COVERAGE_TYPES);
+  const loc = pick(STATES);
+  const tiv = rand(500000, 20000000);
+  const yearsInBusiness = rand(1, 50);
+  const employees = rand(5, 2000);
+  const priorLosses = rand(0, 6);
+  const claimsFiveYear = rand(0, 8);
+
+  // Hidden "true risk" score: 0 = very safe, 1 = very risky
+  let riskScore = 0;
+  riskScore += (industry.riskMod - 0.6) / 1.4 * 0.25;
+  riskScore += (loc.catRisk - 0.7) / 0.9 * 0.15;
+  riskScore += clamp(claimsFiveYear / 6, 0, 1) * 0.2;
+  riskScore += clamp((50 - yearsInBusiness) / 50, 0, 1) * 0.1;
+  riskScore += (priorLosses > 3 ? 0.15 : priorLosses > 1 ? 0.07 : 0);
+
+  // Red/green flags
+  const numRedFlags = riskScore > 0.5 ? rand(1, 3) : (riskScore > 0.3 ? rand(0, 2) : rand(0, 1));
+  const numGreenFlags = riskScore < 0.4 ? rand(1, 3) : (riskScore < 0.6 ? rand(0, 2) : rand(0, 1));
+  riskScore += numRedFlags * 0.08;
+  riskScore -= numGreenFlags * 0.06;
+  riskScore = clamp(riskScore, 0.05, 0.95);
+
+  const selectedRedFlags = [];
+  const redPool = [...RED_FLAGS];
+  for (let i = 0; i < numRedFlags; i++) {
+    const idx = rand(0, redPool.length - 1);
+    selectedRedFlags.push(redPool.splice(idx, 1)[0]);
+  }
+
+  const selectedGreenFlags = [];
+  const greenPool = [...GREEN_FLAGS];
+  for (let i = 0; i < numGreenFlags; i++) {
+    const idx = rand(0, greenPool.length - 1);
+    selectedGreenFlags.push(greenPool.splice(idx, 1)[0]);
+  }
+
+  // "Fair" premium
+  let fairPremium = tiv * coverage.baseRate * industry.riskMod * loc.catRisk;
+  fairPremium *= (1 + (claimsFiveYear * 0.08));
+  fairPremium *= (1 + numRedFlags * 0.1);
+  fairPremium *= (1 - numGreenFlags * 0.05);
+
+  // Cat event modifier
+  let catMod = 1.0;
+  if (state.activeCatEvent) {
+    const ce = state.activeCatEvent;
+    const lineMatch = ce.lines.includes(coverage.name);
+    const stateMatch = !ce.states || ce.states.includes(loc.name);
+    if (lineMatch && stateMatch) catMod = ce.premiumMod;
+    else if (lineMatch || stateMatch) catMod = 1 + (ce.premiumMod - 1) * 0.4;
+  }
+  fairPremium *= catMod;
+  fairPremium = Math.round(fairPremium / 100) * 100;
+
+  // Loss chance (used after binding to determine if claim happens)
+  let lossChance = riskScore * DIFFICULTY[state.difficulty].lossChance;
+  if (state.activeCatEvent) {
+    const ce = state.activeCatEvent;
+    const lineMatch = ce.lines.includes(coverage.name);
+    const stateMatch = !ce.states || ce.states.includes(loc.name);
+    if (lineMatch && stateMatch) lossChance *= ce.lossChanceMod;
+    else if (lineMatch || stateMatch) lossChance *= 1 + (ce.lossChanceMod - 1) * 0.3;
+  }
+  lossChance = clamp(lossChance, 0.03, 0.85);
+
+  return {
+    name: pick(INSURED_NAMES),
+    industry, coverage, state: loc,
+    tiv, yearsInBusiness, employees,
+    priorLosses, claimsFiveYear,
+    redFlags: selectedRedFlags,
+    greenFlags: selectedGreenFlags,
+    riskScore,
+    fairPremium,
+    lossChance,
+    catMod
+  };
+}
+
+// ====== RENDER SUBMISSION ======
+function renderSubmission(sub) {
+  const card = document.getElementById('submission-card');
+  const sliderMin = Math.round(sub.fairPremium * 0.3 / 100) * 100;
+  const sliderMax = Math.round(sub.fairPremium * 2.5 / 100) * 100;
+  const sliderDefault = Math.round(sub.fairPremium * randf(0.7, 1.3) / 100) * 100;
+
+  function flagClass(val, thresholds) {
+    if (val <= thresholds[0]) return 'flag-green';
+    if (val <= thresholds[1]) return 'flag-yellow';
+    return 'flag-red';
+  }
+
+  card.innerHTML = `
+    <div class="submission-header">
+      <div class="insured-name">${sub.name}</div>
+      <div class="coverage-type">${sub.coverage.name}</div>
+    </div>
+    <div class="risk-details">
+      <div class="risk-detail">
+        <span class="label">Industry</span>
+        <span class="value">${sub.industry.name}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">State</span>
+        <span class="value">${sub.state.label} (${sub.state.name})</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">TIV</span>
+        <span class="value">${fmt(sub.tiv)}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">Years in Business</span>
+        <span class="value ${sub.yearsInBusiness < 5 ? 'flag-yellow' : 'flag-green'}">${sub.yearsInBusiness}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">Employees</span>
+        <span class="value">${sub.employees.toLocaleString()}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">Prior Losses (5yr)</span>
+        <span class="value ${flagClass(sub.claimsFiveYear, [1, 3])}">${sub.claimsFiveYear}</span>
+      </div>
+    </div>
+    ${sub.redFlags.length ? `
+    <div class="red-flags">
+      <div class="red-flags-title">Underwriter Notes</div>
+      <div class="red-flags-list">${sub.redFlags.map(f => '&bull; ' + f).join('<br>')}</div>
+    </div>` : ''}
+    ${sub.greenFlags.length ? `
+    <div class="green-flags">
+      <div class="green-flags-title">Positive Indicators</div>
+      <div class="green-flags-list">${sub.greenFlags.map(f => '&bull; ' + f).join('<br>')}</div>
+    </div>` : ''}
+    <div class="premium-section">
+      <span class="premium-label">Your Premium:</span>
+      <div class="premium-slider-wrap">
+        <input type="range" class="premium-slider" id="premium-slider"
+          min="${sliderMin}" max="${sliderMax}" value="${sliderDefault}" step="500">
+      </div>
+      <div class="premium-display" id="premium-display">${fmt(sliderDefault)}</div>
+    </div>
+    <div class="premium-hint">Slide to set your premium before binding</div>
+    <div class="action-buttons">
+      <button class="action-btn bind-btn" onclick="handleBind()">Bind It</button>
+      <button class="action-btn decline-btn" onclick="handleDecline()">Decline</button>
+    </div>
+  `;
+
+  document.getElementById('premium-slider').addEventListener('input', e => {
+    document.getElementById('premium-display').textContent = fmt(parseInt(e.target.value));
+  });
+}
+
+// ====== TIMER ======
+function startTimer() {
+  const diff = DIFFICULTY[state.difficulty];
+  state.timeLeft = diff.time;
+  state.timePerRound = diff.time;
+  updateTimerDisplay();
+
+  state.timerInterval = setInterval(() => {
+    state.timeLeft -= 0.1;
+    updateTimerDisplay();
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timerInterval);
+      handleTimeout();
+    }
+  }, 100);
+}
+
+function updateTimerDisplay() {
+  document.getElementById('hud-timer').textContent = Math.ceil(state.timeLeft) + 's';
+  const pctLeft = (state.timeLeft / state.timePerRound) * 100;
+  document.getElementById('timer-bar').style.width = pctLeft + '%';
+
+  const timerEl = document.getElementById('hud-timer');
+  if (state.timeLeft < 5) timerEl.style.color = 'var(--red)';
+  else if (state.timeLeft < 10) timerEl.style.color = 'var(--orange)';
+  else timerEl.style.color = 'var(--orange)';
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+}
+
+// ====== HUD ======
+function updateHUD() {
+  document.getElementById('hud-revenue').textContent = fmt(state.revenue);
+  const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
+  const lrEl = document.getElementById('hud-loss-ratio');
+  lrEl.textContent = pct(lr);
+  if (lr > 0.7) lrEl.style.color = 'var(--red)';
+  else if (lr > 0.5) lrEl.style.color = 'var(--orange)';
+  else lrEl.style.color = 'var(--green)';
+  document.getElementById('hud-round').textContent = `${state.round} / ${state.totalRounds}`;
+}
+
+// ====== CAT EVENTS ======
+function maybeTriggerCatEvent() {
+  if (state.catEventRoundsLeft > 0) {
+    state.catEventRoundsLeft--;
+    if (state.catEventRoundsLeft === 0) {
+      state.activeCatEvent = null;
+      document.getElementById('event-banner').classList.remove('active');
+    }
+    return;
+  }
+  if (Math.random() < 0.15 && state.round > 2) {
+    state.activeCatEvent = pick(CAT_EVENTS);
+    state.catEventRoundsLeft = rand(2, 4);
+    const banner = document.getElementById('event-banner');
+    const stateStr = state.activeCatEvent.states ? ` (${state.activeCatEvent.states.join(', ')})` : ' (All states)';
+    banner.textContent = `Market Event: ${state.activeCatEvent.name}${stateStr} — Rates hardening!`;
+    banner.classList.add('active');
+  }
+}
+
+// ====== ACTIONS ======
+function handleBind() {
+  stopTimer();
+  const sub = state.currentSubmission;
+  const premium = parseInt(document.getElementById('premium-slider').value);
+  const commission = Math.round(premium * 0.15);
+  const diff = DIFFICULTY[state.difficulty];
+
+  // Did a loss occur?
+  let lossOccurred = Math.random() < sub.lossChance;
+  // Premium adequacy affects severity
+  const premiumRatio = premium / sub.fairPremium;
+  let lossAmount = 0;
+  let lossDesc = '';
+
+  if (lossOccurred) {
+    const severity = randf(0.3, 1.5) * sub.tiv * sub.lossChance;
+    lossAmount = Math.round(severity / 100) * 100;
+    lossDesc = lossAmount > premium * 2 ? 'Catastrophic loss!' : lossAmount > premium ? 'Significant claim filed.' : 'Minor claim filed.';
+  }
+
+  // Pricing feedback
+  let pricingFeedback = '';
+  if (premiumRatio < 0.6) pricingFeedback = 'Severely underpriced! You left money on the table and took on too much risk.';
+  else if (premiumRatio < 0.85) pricingFeedback = 'Below market rate. Competitive, but thin margins.';
+  else if (premiumRatio < 1.15) pricingFeedback = 'Right in the sweet spot. Well priced.';
+  else if (premiumRatio < 1.5) pricingFeedback = 'Above market. Good margin if the risk warrants it.';
+  else pricingFeedback = 'Way above market! The insured might shop this elsewhere.';
+
+  // Revenue: commission minus any loss impact on your results
+  const netResult = commission - (lossOccurred ? Math.round(lossAmount * 0.1) : 0);
+  state.revenue += netResult;
+  state.totalPremium += premium;
+  state.totalLosses += lossAmount;
+  state.totalBinds++;
+
+  if (lossOccurred) state.badBinds++;
+  else state.goodBinds++;
+
+  state.history.push({ action: 'bind', sub, premium, commission, lossOccurred, lossAmount, netResult });
+  updateHUD();
+
+  // Show feedback
+  showFeedback({
+    icon: lossOccurred ? (lossAmount > premium * 2 ? '💀' : '⚠️') : '✅',
+    title: lossOccurred ? 'Claim Filed!' : 'Clean Bind!',
+    detail: `${lossOccurred ? lossDesc + ' ' : ''}${pricingFeedback}<br><br>Commission: ${fmt(commission)}${lossOccurred ? '<br>Loss: ' + fmt(lossAmount) : ''}`,
+    score: netResult,
+    positive: netResult >= 0
+  });
+}
+
+function handleDecline() {
+  stopTimer();
+  const sub = state.currentSubmission;
+
+  // Was it actually a good risk to decline?
+  const wouldHaveLost = Math.random() < sub.lossChance;
+  let feedback = '';
+  let scoreImpact = 0;
+
+  if (sub.riskScore > 0.5) {
+    feedback = 'Smart pass. This had red flags all over it.' + (wouldHaveLost ? ' And a claim would have hit!' : '');
+    scoreImpact = Math.round(sub.fairPremium * 0.02);
+    state.goodDeclines++;
+  } else if (sub.riskScore > 0.3) {
+    feedback = 'Borderline call. ' + (wouldHaveLost ? 'Turns out a loss would have occurred. Good instinct.' : 'This was actually decent business you passed on.');
+    scoreImpact = wouldHaveLost ? Math.round(sub.fairPremium * 0.01) : -Math.round(sub.fairPremium * 0.01);
+    if (wouldHaveLost) state.goodDeclines++; else state.badDeclines++;
+  } else {
+    feedback = 'That was a quality submission! Your competitors are going to write this one happily.';
+    scoreImpact = -Math.round(sub.fairPremium * 0.03);
+    state.badDeclines++;
+  }
+
+  state.revenue += scoreImpact;
+  state.totalDeclines++;
+  state.history.push({ action: 'decline', sub, scoreImpact, wouldHaveLost });
+  updateHUD();
+
+  showFeedback({
+    icon: scoreImpact >= 0 ? '🛡️' : '😬',
+    title: scoreImpact >= 0 ? 'Good Decline' : 'Missed Opportunity',
+    detail: feedback,
+    score: scoreImpact,
+    positive: scoreImpact >= 0
+  });
+}
+
+function handleTimeout() {
+  const sub = state.currentSubmission;
+  state.totalDeclines++;
+  state.badDeclines++;
+  const penalty = -Math.round(sub.fairPremium * 0.04);
+  state.revenue += penalty;
+  state.history.push({ action: 'timeout', sub, scoreImpact: penalty });
+  updateHUD();
+
+  showFeedback({
+    icon: '⏰',
+    title: 'Time\'s Up!',
+    detail: 'The submission expired. The retailer moved on to another wholesaler. You lost reputation.',
+    score: penalty,
+    positive: false
+  });
+}
+
+// ====== FEEDBACK ======
+function showFeedback({ icon, title, detail, score, positive }) {
+  const overlay = document.getElementById('feedback-overlay');
+  const card = document.getElementById('feedback-card');
+  card.innerHTML = `
+    <div class="feedback-icon">${icon}</div>
+    <div class="feedback-title">${title}</div>
+    <div class="feedback-detail">${detail}</div>
+    <div class="feedback-score ${positive ? 'positive' : 'negative'}">${score >= 0 ? '+' : ''}${fmt(score)}</div>
+    <button class="next-btn" onclick="nextRound()">
+      ${state.round >= state.totalRounds ? 'See Results' : 'Next Submission →'}
+    </button>
+  `;
+  overlay.classList.add('active');
+}
+
+// ====== FLOW ======
+function startGame() {
+  const diff = DIFFICULTY[state.difficulty];
+  state.round = 0;
+  state.revenue = 0;
+  state.totalPremium = 0;
+  state.totalLosses = 0;
+  state.totalBinds = 0;
+  state.totalDeclines = 0;
+  state.goodBinds = 0;
+  state.badBinds = 0;
+  state.goodDeclines = 0;
+  state.badDeclines = 0;
+  state.totalRounds = diff.rounds;
+  state.activeCatEvent = null;
+  state.catEventRoundsLeft = 0;
+  state.history = [];
+  state.achievements = [];
+
+  document.getElementById('event-banner').classList.remove('active');
+  showScreen('game-screen');
+  nextRound();
+}
+
+function nextRound() {
+  document.getElementById('feedback-overlay').classList.remove('active');
+
+  if (state.round >= state.totalRounds) {
+    endGame();
+    return;
+  }
+
+  state.round++;
+  maybeTriggerCatEvent();
+  state.currentSubmission = generateSubmission();
+  renderSubmission(state.currentSubmission);
+  updateHUD();
+  startTimer();
+}
+
+function endGame() {
+  stopTimer();
+  document.getElementById('event-banner').classList.remove('active');
+
+  const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
+  const bindRate = state.totalBinds / state.totalRounds;
+  const accuracy = (state.goodBinds + state.goodDeclines) / state.totalRounds;
+
+  // Grade
+  let grade, gradeColor;
+  const score = state.revenue / 1000 + (accuracy * 50) - (lr * 80);
+  if (score > 60) { grade = 'A+'; gradeColor = '#00b894'; }
+  else if (score > 40) { grade = 'A'; gradeColor = '#00b894'; }
+  else if (score > 25) { grade = 'B+'; gradeColor = '#4f8cff'; }
+  else if (score > 10) { grade = 'B'; gradeColor = '#4f8cff'; }
+  else if (score > 0) { grade = 'C'; gradeColor = '#f39c12'; }
+  else if (score > -15) { grade = 'D'; gradeColor = '#e74c3c'; }
+  else { grade = 'F'; gradeColor = '#e74c3c'; }
+
+  // Achievements
+  const ach = [];
+  if (lr < 0.3 && state.totalBinds > 5) ach.push('Cherry Picker — Loss ratio under 30%');
+  if (lr === 0 && state.totalBinds > 0) ach.push('Loss-Free Book — Zero losses!');
+  if (state.totalBinds === state.totalRounds) ach.push('Bind Everything — Never declined');
+  if (state.totalDeclines === state.totalRounds) ach.push('The Gatekeeper — Declined every submission');
+  if (state.revenue > 50000) ach.push('Big Producer — Over $50K revenue');
+  if (state.revenue > 100000) ach.push('Rainmaker — Over $100K revenue');
+  if (accuracy > 0.8) ach.push('Sharp Eye — 80%+ decision accuracy');
+  if (state.goodDeclines > 5) ach.push('Risk Radar — Dodged 5+ bad risks');
+  if (state.badDeclines === 0 && state.totalDeclines > 0) ach.push('No Regrets — Every decline was justified');
+  if (bindRate > 0.7 && lr < 0.5) ach.push('Volume Player — High bind rate, controlled losses');
+  state.achievements = ach;
+
+  const screen = document.getElementById('gameover-screen');
+  screen.innerHTML = `
+    <h1>Game Over</h1>
+    <div class="grade-display" style="color: ${gradeColor}">${grade}</div>
+    <div class="grade-label">Underwriter Grade</div>
+    <div class="final-stats">
+      <div class="final-stat">
+        <div class="label">Total Revenue</div>
+        <div class="value" style="color: ${state.revenue >= 0 ? 'var(--green)' : 'var(--red)'}">${fmt(state.revenue)}</div>
+      </div>
+      <div class="final-stat">
+        <div class="label">Loss Ratio</div>
+        <div class="value" style="color: ${lr > 0.7 ? 'var(--red)' : lr > 0.5 ? 'var(--orange)' : 'var(--green)'}">${pct(lr)}</div>
+      </div>
+      <div class="final-stat">
+        <div class="label">Risks Bound</div>
+        <div class="value">${state.totalBinds} / ${state.totalRounds}</div>
+      </div>
+      <div class="final-stat">
+        <div class="label">Decision Accuracy</div>
+        <div class="value">${pct(accuracy)}</div>
+      </div>
+    </div>
+    ${ach.length ? `
+    <div>
+      <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 0.5rem;">Achievements Unlocked</p>
+      <div class="achievements">
+        ${ach.map(a => `<div class="achievement">${a}</div>`).join('')}
+      </div>
+    </div>` : ''}
+    <button class="start-btn" onclick="showScreen('title-screen')">Play Again</button>
+  `;
+  showScreen('gameover-screen');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (document.getElementById('feedback-overlay').classList.contains('active')) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextRound(); }
+    return;
+  }
+  if (!document.getElementById('game-screen').classList.contains('active')) return;
+  if (e.key === 'b' || e.key === 'B' || e.key === 'Enter') handleBind();
+  else if (e.key === 'd' || e.key === 'D' || e.key === 'Escape') handleDecline();
+  else if (e.key === 'ArrowLeft') {
+    const s = document.getElementById('premium-slider');
+    s.value = parseInt(s.value) - 500;
+    s.dispatchEvent(new Event('input'));
+  } else if (e.key === 'ArrowRight') {
+    const s = document.getElementById('premium-slider');
+    s.value = parseInt(s.value) + 500;
+    s.dispatchEvent(new Event('input'));
+  }
+});
+</script>
+</body>
+</html>
