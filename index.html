@@ -1668,13 +1668,19 @@ function endGame() {
       </div>
     </div>` : ''}
     <div class="share-row">
-      <button class="share-btn" onclick="shareResults('${grade}', ${state.revenue}, '${pct(lr)}', '${pct(cr)}', ${state.totalBinds}, '${pct(accuracy)}', '${state.difficulty}', ${state.firedReason ? 'true' : 'false'}, '${gradeColor}', ${JSON.stringify(ach).replace(/'/g, "\\'")})">${navigator.share ? 'Share Results' : 'Download Results'}</button>
-      <button class="share-btn share-btn-text" onclick="copyTextResults('${grade}', ${state.revenue}, '${pct(lr)}', '${pct(cr)}', ${state.totalBinds}, '${pct(accuracy)}', '${state.difficulty}', ${state.firedReason ? 'true' : 'false'})">Copy Text</button>
+      <button class="share-btn" onclick="doShare()">${navigator.share ? 'Share Results' : 'Download Results'}</button>
+      <button class="share-btn share-btn-text" onclick="doCopyText()">Copy Text</button>
     </div>
     <button class="start-btn" onclick="showScreen('title-screen')">Play Again</button>
   `;
+  // Store for share handlers
+  state.lastResults = { grade, gradeColor, revenue: state.revenue, lr: pct(lr), cr: pct(cr), binds: state.totalBinds, accuracy: pct(accuracy), difficulty: state.difficulty, fired: !!state.firedReason, achievements: ach };
+
   showScreen('gameover-screen');
 }
+
+function doShare() { const r = state.lastResults; shareResults(r.grade, r.revenue, r.lr, r.cr, r.binds, r.accuracy, r.difficulty, r.fired, r.gradeColor, r.achievements); }
+function doCopyText() { const r = state.lastResults; copyTextResults(r.grade, r.revenue, r.lr, r.cr, r.binds, r.accuracy, r.difficulty, r.fired); }
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
