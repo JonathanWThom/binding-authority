@@ -40,6 +40,7 @@
     text-align: center;
     gap: 2rem;
     background: radial-gradient(ellipse at 50% 30%, #1a2a50 0%, var(--bg) 70%);
+    padding: 1rem;
   }
   #title-screen h1 {
     font-size: clamp(2rem, 6vw, 4rem);
@@ -51,8 +52,8 @@
   }
   #title-screen .subtitle {
     color: var(--text-dim);
-    font-size: 1.1rem;
-    max-width: 500px;
+    font-size: 1.05rem;
+    max-width: 540px;
     line-height: 1.5;
   }
   .start-btn {
@@ -94,35 +95,36 @@
   /* ---- GAME SCREEN ---- */
   #game-screen {
     justify-content: flex-start;
-    padding: 1rem;
-    gap: 1rem;
+    padding: 0.75rem;
+    gap: 0.6rem;
   }
 
   .hud {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
     width: 100%;
-    max-width: 700px;
+    max-width: 780px;
   }
   .hud-item {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 0.6rem 0.8rem;
+    padding: 0.45rem 0.6rem;
     text-align: center;
   }
-  .hud-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
-  .hud-value { font-size: 1.3rem; font-weight: 800; margin-top: 0.15rem; }
+  .hud-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+  .hud-value { font-size: 1.1rem; font-weight: 800; margin-top: 0.1rem; }
   .hud-value.money { color: var(--green); }
   .hud-value.loss-ratio { color: var(--accent); }
   .hud-value.timer { color: var(--orange); }
   .hud-value.round { color: var(--accent2); }
+  .hud-value.streak { color: var(--gold); }
 
   .timer-bar-container {
     width: 100%;
-    max-width: 700px;
-    height: 6px;
+    max-width: 780px;
+    height: 5px;
     background: var(--surface);
     border-radius: 3px;
     overflow: hidden;
@@ -134,13 +136,29 @@
     transition: width 0.1s linear;
   }
 
+  /* Loss ratio warning */
+  .lr-warning {
+    width: 100%;
+    max-width: 780px;
+    background: rgba(231,76,60,0.15);
+    border: 1px solid rgba(231,76,60,0.4);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--red);
+    display: none;
+  }
+  .lr-warning.active { display: block; }
+
   .submission-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 1.2rem;
     width: 100%;
-    max-width: 700px;
+    max-width: 780px;
     position: relative;
     overflow: hidden;
   }
@@ -156,32 +174,36 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
-  .insured-name { font-size: 1.3rem; font-weight: 800; }
-  .coverage-type {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 0.3rem 0.8rem;
+  .insured-name { font-size: 1.2rem; font-weight: 800; }
+  .header-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .badge {
+    padding: 0.25rem 0.6rem;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    color: var(--accent);
+    border: 1px solid var(--border);
+    background: var(--surface2);
   }
+  .badge-coverage { color: var(--accent); }
+  .badge-surplus { color: var(--orange); border-color: rgba(243,156,18,0.4); background: rgba(243,156,18,0.08); }
 
   .risk-details {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-    margin-bottom: 1.2rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
   }
   .risk-detail {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 0.7rem;
+    padding: 0.4rem 0.6rem;
     background: var(--surface2);
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   .risk-detail .label { color: var(--text-dim); }
   .risk-detail .value { font-weight: 600; }
@@ -189,89 +211,139 @@
   .risk-detail .value.flag-yellow { color: var(--orange); }
   .risk-detail .value.flag-green { color: var(--green); }
 
+  .flags-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .red-flags, .green-flags {
+    border-radius: 10px;
+    padding: 0.6rem 0.7rem;
+  }
   .red-flags {
     background: rgba(231, 76, 60, 0.08);
     border: 1px solid rgba(231, 76, 60, 0.2);
-    border-radius: 10px;
-    padding: 0.8rem;
-    margin-bottom: 1.2rem;
   }
-  .red-flags-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--red);
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-  }
-  .red-flags-list {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    line-height: 1.5;
-  }
-
   .green-flags {
     background: rgba(0, 184, 148, 0.08);
     border: 1px solid rgba(0, 184, 148, 0.2);
-    border-radius: 10px;
-    padding: 0.8rem;
-    margin-bottom: 1.2rem;
   }
-  .green-flags-title {
-    font-size: 0.75rem;
+  .flags-title {
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .red-flags .flags-title { color: var(--red); }
+  .green-flags .flags-title { color: var(--green); }
+  .flags-list {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* Carrier selection */
+  .carrier-section {
+    margin-bottom: 0.8rem;
+  }
+  .carrier-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
     font-weight: 700;
     margin-bottom: 0.4rem;
   }
-  .green-flags-list {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    line-height: 1.5;
+  .carrier-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .carrier-card {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .carrier-card:hover { border-color: var(--accent); }
+  .carrier-card.selected { border-color: var(--accent); background: rgba(79,140,255,0.08); }
+  .carrier-card.unavailable {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: var(--border);
+  }
+  .carrier-card.unavailable:hover { border-color: var(--border); }
+  .carrier-name { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .carrier-detail { font-size: 0.7rem; color: var(--text-dim); line-height: 1.4; }
+  .carrier-detail span { color: var(--text); font-weight: 600; }
+  .carrier-appetite {
+    display: inline-block;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-top: 0.2rem;
+  }
+  .appetite-high { background: rgba(0,184,148,0.15); color: var(--green); }
+  .appetite-medium { background: rgba(243,156,18,0.15); color: var(--orange); }
+  .appetite-low { background: rgba(231,76,60,0.15); color: var(--red); }
+  .appetite-none { background: rgba(122,133,153,0.15); color: var(--text-dim); }
+  .carrier-relationship {
+    font-size: 0.6rem;
+    margin-top: 0.15rem;
   }
 
-  .premium-section {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
-    flex-wrap: wrap;
+  /* Controls row */
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
   }
-  .premium-label { font-weight: 600; font-size: 0.9rem; }
-  .premium-slider-wrap { flex: 1; min-width: 200px; }
-  .premium-slider {
-    width: 100%;
-    accent-color: var(--accent);
-    height: 6px;
+  .control-group label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
   }
-  .premium-display {
-    font-size: 1.4rem;
+  .control-group .control-display {
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--green);
-    min-width: 100px;
-    text-align: right;
+    text-align: center;
+    margin-bottom: 0.15rem;
   }
-  .premium-hint {
+  .control-group input[type="range"] {
     width: 100%;
-    font-size: 0.75rem;
+    accent-color: var(--accent);
+  }
+  .control-hint {
+    font-size: 0.6rem;
     color: var(--text-dim);
     text-align: center;
-    margin-top: -0.3rem;
   }
 
   .action-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 0.8rem;
     justify-content: center;
   }
   .action-btn {
     flex: 1;
-    max-width: 200px;
-    padding: 0.9rem 1.5rem;
+    max-width: 180px;
+    padding: 0.75rem 1.2rem;
     border: none;
     border-radius: 10px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
@@ -283,6 +355,8 @@
   .bind-btn:hover { box-shadow: 0 6px 20px rgba(0,184,148,0.3); }
   .decline-btn { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
   .decline-btn:hover { box-shadow: 0 6px 20px rgba(231,76,60,0.3); }
+  .refer-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
+  .refer-btn:hover { box-shadow: 0 6px 20px rgba(79,140,255,0.3); }
 
   /* Feedback overlay */
   .feedback-overlay {
@@ -300,17 +374,33 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 2rem;
-    max-width: 450px;
+    padding: 1.5rem;
+    max-width: 500px;
     width: 90%;
     text-align: center;
   }
-  .feedback-icon { font-size: 3rem; margin-bottom: 0.5rem; }
-  .feedback-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
-  .feedback-detail { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem; }
-  .feedback-score { font-size: 1.5rem; font-weight: 800; }
+  .feedback-icon { font-size: 3rem; margin-bottom: 0.4rem; }
+  .feedback-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .feedback-detail { color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.8rem; }
+  .feedback-score { font-size: 1.4rem; font-weight: 800; }
   .feedback-score.positive { color: var(--green); }
   .feedback-score.negative { color: var(--red); }
+  .feedback-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin: 0.6rem 0;
+    font-size: 0.8rem;
+  }
+  .feedback-breakdown .fb-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0.5rem;
+    background: var(--surface2);
+    border-radius: 6px;
+  }
+  .fb-item .fb-label { color: var(--text-dim); }
+  .fb-item .fb-val { font-weight: 600; }
   .next-btn {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -320,7 +410,7 @@
     cursor: pointer;
     font-family: inherit;
     font-weight: 600;
-    margin-top: 0.8rem;
+    margin-top: 0.6rem;
     transition: all 0.15s;
   }
   .next-btn:hover { border-color: var(--accent); }
@@ -332,9 +422,9 @@
     background: linear-gradient(90deg, var(--red), var(--orange));
     color: white;
     text-align: center;
-    padding: 0.8rem;
+    padding: 0.6rem;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     z-index: 90;
     transform: translateY(-100%);
     transition: transform 0.4s ease;
@@ -344,26 +434,26 @@
   /* ---- GAME OVER ---- */
   #gameover-screen {
     text-align: center;
-    gap: 1.5rem;
+    gap: 1.2rem;
     background: radial-gradient(ellipse at 50% 30%, #1a2a50 0%, var(--bg) 70%);
-    padding: 2rem;
+    padding: 1.5rem;
   }
-  #gameover-screen h1 { font-size: 2.5rem; font-weight: 900; }
+  #gameover-screen h1 { font-size: 2.2rem; font-weight: 900; }
   .final-stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    max-width: 400px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    max-width: 550px;
     width: 100%;
   }
   .final-stat {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1rem;
+    padding: 0.8rem;
   }
-  .final-stat .label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
-  .final-stat .value { font-size: 1.5rem; font-weight: 800; margin-top: 0.3rem; }
+  .final-stat .label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .final-stat .value { font-size: 1.3rem; font-weight: 800; margin-top: 0.2rem; }
 
   .grade-display {
     font-size: 5rem;
@@ -377,29 +467,27 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     justify-content: center;
-    max-width: 500px;
+    max-width: 550px;
   }
   .achievement {
     background: var(--surface);
     border: 1px solid var(--gold);
     border-radius: 8px;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--gold);
   }
 
-  /* Cat event flash */
-  @keyframes catFlash {
-    0%, 100% { opacity: 0; }
-    10%, 90% { opacity: 1; }
-  }
-
   /* Responsive */
-  @media (max-width: 600px) {
-    .hud { grid-template-columns: repeat(2, 1fr); }
-    .risk-details { grid-template-columns: 1fr; }
-    .submission-card { padding: 1rem; }
+  @media (max-width: 700px) {
+    .hud { grid-template-columns: repeat(3, 1fr); }
+    .risk-details { grid-template-columns: repeat(2, 1fr); }
+    .carrier-options { grid-template-columns: 1fr; }
+    .controls-row { grid-template-columns: 1fr; }
+    .flags-row { grid-template-columns: 1fr; }
+    .submission-card { padding: 0.8rem; }
+    .final-stats { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -408,7 +496,7 @@
 <!-- TITLE SCREEN -->
 <div id="title-screen" class="screen active">
   <h1>The Binding<br>Authority</h1>
-  <p class="subtitle">You're a wholesale broker with binding authority. Evaluate submissions, set premiums, and manage your book. Watch the loss ratio or get fired.</p>
+  <p class="subtitle">You're a wholesale broker with binding authority. Evaluate submissions, pick carriers, set terms, and manage your book. Let your loss ratio blow out and the carriers will drop you.</p>
   <div>
     <p style="color: var(--text-dim); margin-bottom: 0.6rem; font-size: 0.85rem;">Difficulty</p>
     <div class="difficulty-select">
@@ -418,6 +506,9 @@
     </div>
   </div>
   <button class="start-btn" onclick="startGame()">Start Underwriting</button>
+  <div style="color: var(--text-dim); font-size: 0.75rem; max-width: 400px; line-height: 1.4;">
+    Keys: <b>1/2/3</b> select carrier &bull; <b>Arrow keys</b> adjust sliders &bull; <b>B</b> bind &bull; <b>D</b> decline &bull; <b>R</b> refer &bull; <b>Tab</b> cycle sliders &bull; <b>Space/Enter</b> next
+  </div>
 </div>
 
 <!-- GAME SCREEN -->
@@ -432,6 +523,10 @@
       <div class="hud-value loss-ratio" id="hud-loss-ratio">0%</div>
     </div>
     <div class="hud-item">
+      <div class="hud-label">Combined Ratio</div>
+      <div class="hud-value loss-ratio" id="hud-combined">0%</div>
+    </div>
+    <div class="hud-item">
       <div class="hud-label">Round</div>
       <div class="hud-value round" id="hud-round">1 / 20</div>
     </div>
@@ -444,6 +539,8 @@
   <div class="timer-bar-container">
     <div class="timer-bar" id="timer-bar"></div>
   </div>
+
+  <div class="lr-warning" id="lr-warning">Loss ratio above 70% — carriers are watching. Hit 90% and you lose your authority.</div>
 
   <div class="submission-card" id="submission-card"></div>
 
@@ -479,53 +576,66 @@ const INSURED_NAMES = [
 ];
 
 const COVERAGE_TYPES = [
-  { name: "General Liability", baseRate: 0.005 },
-  { name: "Professional Liability (E&O)", baseRate: 0.008 },
-  { name: "Commercial Property", baseRate: 0.004 },
-  { name: "Excess/Umbrella", baseRate: 0.003 },
-  { name: "Commercial Auto", baseRate: 0.006 },
-  { name: "Workers' Compensation", baseRate: 0.007 },
-  { name: "Cyber Liability", baseRate: 0.01 },
-  { name: "Directors & Officers (D&O)", baseRate: 0.009 },
-  { name: "Environmental Liability", baseRate: 0.012 },
-  { name: "Product Liability", baseRate: 0.008 },
-  { name: "Inland Marine", baseRate: 0.005 },
-  { name: "Builders Risk", baseRate: 0.006 }
+  { name: "General Liability", baseRate: 0.005, abbr: "GL" },
+  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O" },
+  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP" },
+  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS" },
+  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA" },
+  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC" },
+  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber" },
+  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O" },
+  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro" },
+  { name: "Product Liability", baseRate: 0.008, abbr: "PL" },
+  { name: "Inland Marine", baseRate: 0.005, abbr: "IM" },
+  { name: "Builders Risk", baseRate: 0.006, abbr: "BR" }
 ];
 
 const INDUSTRIES = [
-  { name: "Construction", riskMod: 1.4 },
-  { name: "Manufacturing", riskMod: 1.2 },
-  { name: "Hospitality", riskMod: 1.1 },
-  { name: "Healthcare", riskMod: 1.3 },
-  { name: "Technology", riskMod: 0.8 },
-  { name: "Real Estate", riskMod: 0.9 },
-  { name: "Transportation", riskMod: 1.5 },
-  { name: "Energy / Oil & Gas", riskMod: 1.6 },
-  { name: "Cannabis", riskMod: 1.8 },
-  { name: "Agriculture", riskMod: 1.2 },
-  { name: "Entertainment / Events", riskMod: 1.3 },
-  { name: "Marine", riskMod: 1.4 },
-  { name: "Aviation", riskMod: 1.7 },
-  { name: "Mining", riskMod: 1.6 },
-  { name: "Food & Beverage", riskMod: 1.0 },
-  { name: "Retail", riskMod: 0.7 },
-  { name: "Professional Services", riskMod: 0.6 }
+  { name: "Construction", riskMod: 1.4, class: "artisan" },
+  { name: "Manufacturing", riskMod: 1.2, class: "industrial" },
+  { name: "Hospitality", riskMod: 1.1, class: "service" },
+  { name: "Healthcare", riskMod: 1.3, class: "professional" },
+  { name: "Technology", riskMod: 0.8, class: "professional" },
+  { name: "Real Estate", riskMod: 0.9, class: "property" },
+  { name: "Transportation", riskMod: 1.5, class: "fleet" },
+  { name: "Energy / Oil & Gas", riskMod: 1.6, class: "industrial" },
+  { name: "Cannabis", riskMod: 1.8, class: "specialty" },
+  { name: "Agriculture", riskMod: 1.2, class: "specialty" },
+  { name: "Entertainment / Events", riskMod: 1.3, class: "service" },
+  { name: "Marine", riskMod: 1.4, class: "specialty" },
+  { name: "Aviation", riskMod: 1.7, class: "specialty" },
+  { name: "Mining", riskMod: 1.6, class: "industrial" },
+  { name: "Food & Beverage", riskMod: 1.0, class: "service" },
+  { name: "Retail", riskMod: 0.7, class: "service" },
+  { name: "Professional Services", riskMod: 0.6, class: "professional" }
 ];
 
 const STATES = [
-  { name: "FL", catRisk: 1.5, label: "Florida" },
-  { name: "CA", catRisk: 1.3, label: "California" },
-  { name: "TX", catRisk: 1.2, label: "Texas" },
-  { name: "LA", catRisk: 1.4, label: "Louisiana" },
-  { name: "NY", catRisk: 0.8, label: "New York" },
-  { name: "IL", catRisk: 0.9, label: "Illinois" },
-  { name: "OH", catRisk: 0.7, label: "Ohio" },
-  { name: "CO", catRisk: 0.8, label: "Colorado" },
-  { name: "WA", catRisk: 0.7, label: "Washington" },
-  { name: "NC", catRisk: 1.1, label: "North Carolina" },
-  { name: "OK", catRisk: 1.3, label: "Oklahoma" },
-  { name: "AZ", catRisk: 0.9, label: "Arizona" }
+  { name: "FL", catRisk: 1.5, label: "Florida", surplus: true },
+  { name: "CA", catRisk: 1.3, label: "California", surplus: true },
+  { name: "TX", catRisk: 1.2, label: "Texas", surplus: false },
+  { name: "LA", catRisk: 1.4, label: "Louisiana", surplus: true },
+  { name: "NY", catRisk: 0.8, label: "New York", surplus: true },
+  { name: "IL", catRisk: 0.9, label: "Illinois", surplus: false },
+  { name: "OH", catRisk: 0.7, label: "Ohio", surplus: false },
+  { name: "CO", catRisk: 0.8, label: "Colorado", surplus: false },
+  { name: "WA", catRisk: 0.7, label: "Washington", surplus: false },
+  { name: "NC", catRisk: 1.1, label: "North Carolina", surplus: false },
+  { name: "OK", catRisk: 1.3, label: "Oklahoma", surplus: false },
+  { name: "AZ", catRisk: 0.9, label: "Arizona", surplus: false }
+];
+
+const CARRIERS = [
+  { name: "Markel Specialty", rating: "A", commission: 0.15, appetite: { specialty: 2, industrial: 1, professional: 1, service: 1, property: 0, fleet: 0, artisan: 1 }, maxTIV: 15000000, minPremium: 10000 },
+  { name: "Lexington (AIG)", rating: "A+", commission: 0.12, appetite: { specialty: 1, industrial: 2, professional: 2, service: 2, property: 2, fleet: 1, artisan: 1 }, maxTIV: 50000000, minPremium: 25000 },
+  { name: "Scottsdale (Nationwide)", rating: "A+", commission: 0.14, appetite: { specialty: 0, industrial: 1, professional: 1, service: 2, property: 1, fleet: 1, artisan: 2 }, maxTIV: 20000000, minPremium: 5000 },
+  { name: "Lloyd's Syndicate 2003", rating: "A", commission: 0.10, appetite: { specialty: 2, industrial: 2, professional: 1, service: 0, property: 2, fleet: 2, artisan: 0 }, maxTIV: 100000000, minPremium: 50000 },
+  { name: "Kinsale Capital", rating: "A", commission: 0.16, appetite: { specialty: 1, industrial: 1, professional: 0, service: 2, property: 1, fleet: 0, artisan: 2 }, maxTIV: 10000000, minPremium: 5000 },
+  { name: "USLI (Berkshire)", rating: "A++", commission: 0.11, appetite: { specialty: 0, industrial: 0, professional: 2, service: 2, property: 1, fleet: 0, artisan: 1 }, maxTIV: 8000000, minPremium: 3000 },
+  { name: "Colony (Argo)", rating: "A-", commission: 0.17, appetite: { specialty: 1, industrial: 2, professional: 0, service: 1, property: 2, fleet: 2, artisan: 1 }, maxTIV: 25000000, minPremium: 15000 },
+  { name: "Nautilus (Berkley)", rating: "A+", commission: 0.13, appetite: { specialty: 2, industrial: 1, professional: 2, service: 1, property: 0, fleet: 1, artisan: 0 }, maxTIV: 30000000, minPremium: 20000 },
+  { name: "Evanston (Markel)", rating: "A", commission: 0.15, appetite: { specialty: 1, industrial: 0, professional: 1, service: 2, property: 2, fleet: 0, artisan: 2 }, maxTIV: 12000000, minPremium: 5000 },
+  { name: "StarStone (Enstar)", rating: "A-", commission: 0.18, appetite: { specialty: 2, industrial: 2, professional: 0, service: 0, property: 1, fleet: 2, artisan: 1 }, maxTIV: 40000000, minPremium: 30000 }
 ];
 
 const RED_FLAGS = [
@@ -548,7 +658,12 @@ const RED_FLAGS = [
   "Delinquent premium payments with prior carrier",
   "Cyber breach in last 24 months, no remediation plan",
   "Product recall in last 3 years",
-  "Environmental cleanup order pending"
+  "Environmental cleanup order pending",
+  "Bankruptcy filing in last 7 years",
+  "Owner has personal liens exceeding $500K",
+  "Declined by 3+ carriers this cycle",
+  "Incomplete loss runs provided",
+  "Prior fraud allegation (unresolved)"
 ];
 
 const GREEN_FLAGS = [
@@ -576,8 +691,13 @@ const CAT_EVENTS = [
   { name: "Tort Reform Reversal", states: null, lines: ["General Liability", "Product Liability", "Professional Liability (E&O)"], premiumMod: 1.2, lossChanceMod: 1.4 },
   { name: "Tornado Outbreak", states: ["OK", "TX", "IL", "OH"], lines: ["Commercial Property"], premiumMod: 1.6, lossChanceMod: 2.2 },
   { name: "Nuclear Verdict Trend", states: null, lines: ["Commercial Auto", "General Liability", "Excess/Umbrella"], premiumMod: 1.3, lossChanceMod: 1.5 },
-  { name: "Pandemic Resurgence", states: null, lines: ["Workers' Compensation", "Directors & Officers (D&O)"], premiumMod: 1.2, lossChanceMod: 1.3 }
+  { name: "Pandemic Resurgence", states: null, lines: ["Workers' Compensation", "Directors & Officers (D&O)"], premiumMod: 1.2, lossChanceMod: 1.3 },
+  { name: "Social Inflation Spike", states: null, lines: ["General Liability", "Commercial Auto", "Product Liability"], premiumMod: 1.25, lossChanceMod: 1.4 },
+  { name: "Reinsurance Treaty Collapse", states: null, lines: ["Excess/Umbrella", "Commercial Property"], premiumMod: 1.7, lossChanceMod: 1.3 }
 ];
+
+const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
+const RETENTION_OPTIONS = [5000, 10000, 25000, 50000, 100000, 250000, 500000];
 
 // ====== GAME STATE ======
 let state = {
@@ -587,8 +707,10 @@ let state = {
   revenue: 0,
   totalPremium: 0,
   totalLosses: 0,
+  totalExpenses: 0,
   totalBinds: 0,
   totalDeclines: 0,
+  totalRefers: 0,
   goodBinds: 0,
   badBinds: 0,
   goodDeclines: 0,
@@ -597,23 +719,41 @@ let state = {
   timeLeft: 30,
   timerInterval: null,
   currentSubmission: null,
+  selectedCarrierIdx: -1,
   activeCatEvent: null,
   catEventRoundsLeft: 0,
   history: [],
-  achievements: []
+  achievements: [],
+  carrierRelationships: {},
+  firedReason: null,
+  activeSlider: 0 // 0=premium, 1=limit, 2=retention
 };
 
 const DIFFICULTY = {
-  easy:   { time: 45, rounds: 15, lossChance: 0.25, premiumForgiveness: 0.2 },
-  medium: { time: 30, rounds: 20, lossChance: 0.35, premiumForgiveness: 0.1 },
-  hard:   { time: 20, rounds: 25, lossChance: 0.45, premiumForgiveness: 0.05 }
+  easy:   { time: 40, rounds: 15, lossChance: 0.30, overpriceThreshold: 1.6, fireThreshold: 1.0 },
+  medium: { time: 28, rounds: 20, lossChance: 0.40, overpriceThreshold: 1.35, fireThreshold: 0.90 },
+  hard:   { time: 18, rounds: 25, lossChance: 0.50, overpriceThreshold: 1.2, fireThreshold: 0.80 }
 };
 
 // ====== UTILITY ======
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN(arr, n) {
+  const pool = [...arr];
+  const result = [];
+  for (let i = 0; i < Math.min(n, pool.length); i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    result.push(pool.splice(idx, 1)[0]);
+  }
+  return result;
+}
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function randf(min, max) { return Math.random() * (max - min) + min; }
-function fmt(n) { return '$' + n.toLocaleString(); }
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+function fmtShort(n) {
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + Math.round(n/1000) + 'K';
+  return '$' + n.toLocaleString();
+}
 function pct(n) { return Math.round(n * 100) + '%'; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
@@ -626,16 +766,50 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
   });
 });
 
+// ====== CARRIER RELATIONSHIPS ======
+function initCarrierRelationships() {
+  state.carrierRelationships = {};
+  CARRIERS.forEach(c => {
+    state.carrierRelationships[c.name] = { score: 50, binds: 0, losses: 0 };
+  });
+}
+
+function getCarrierRelationship(name) {
+  return state.carrierRelationships[name] || { score: 50, binds: 0, losses: 0 };
+}
+
+function updateCarrierRelationship(name, hadLoss, lossAmount, premium) {
+  const rel = state.carrierRelationships[name];
+  if (!rel) return;
+  rel.binds++;
+  if (hadLoss) {
+    rel.losses++;
+    const severity = lossAmount / premium;
+    rel.score -= Math.round(severity * 15 + 5);
+  } else {
+    rel.score += 3;
+  }
+  rel.score = clamp(rel.score, 0, 100);
+}
+
+function carrierRelationshipLabel(score) {
+  if (score >= 70) return { text: 'Preferred', color: 'var(--green)' };
+  if (score >= 40) return { text: 'Standard', color: 'var(--text-dim)' };
+  if (score >= 20) return { text: 'Watch List', color: 'var(--orange)' };
+  return { text: 'Suspended', color: 'var(--red)' };
+}
+
 // ====== GENERATE SUBMISSION ======
 function generateSubmission() {
   const industry = pick(INDUSTRIES);
   const coverage = pick(COVERAGE_TYPES);
   const loc = pick(STATES);
-  const tiv = rand(500000, 20000000);
+  const tiv = rand(500000, 25000000);
   const yearsInBusiness = rand(1, 50);
   const employees = rand(5, 2000);
-  const priorLosses = rand(0, 6);
-  const claimsFiveYear = rand(0, 8);
+  const priorLosses = rand(0, 8);
+  const claimsFiveYear = rand(0, 10);
+  const currentCarrier = Math.random() > 0.3 ? pick(["Zurich", "Hartford", "CNA", "Travelers", "Liberty Mutual", "None — new venture", "Declined to disclose"]) : "None — non-renewed";
 
   // Hidden "true risk" score: 0 = very safe, 1 = very risky
   let riskScore = 0;
@@ -643,33 +817,25 @@ function generateSubmission() {
   riskScore += (loc.catRisk - 0.7) / 0.9 * 0.15;
   riskScore += clamp(claimsFiveYear / 6, 0, 1) * 0.2;
   riskScore += clamp((50 - yearsInBusiness) / 50, 0, 1) * 0.1;
-  riskScore += (priorLosses > 3 ? 0.15 : priorLosses > 1 ? 0.07 : 0);
+  riskScore += (priorLosses > 4 ? 0.18 : priorLosses > 2 ? 0.1 : priorLosses > 0 ? 0.04 : 0);
+  if (currentCarrier === "None — non-renewed") riskScore += 0.15;
+  if (currentCarrier === "Declined to disclose") riskScore += 0.1;
+  if (currentCarrier === "None — new venture") riskScore += 0.05;
 
-  // Red/green flags
-  const numRedFlags = riskScore > 0.5 ? rand(1, 3) : (riskScore > 0.3 ? rand(0, 2) : rand(0, 1));
-  const numGreenFlags = riskScore < 0.4 ? rand(1, 3) : (riskScore < 0.6 ? rand(0, 2) : rand(0, 1));
-  riskScore += numRedFlags * 0.08;
-  riskScore -= numGreenFlags * 0.06;
+  // Red/green flags - more red flags in this version
+  const numRedFlags = riskScore > 0.45 ? rand(1, 4) : (riskScore > 0.25 ? rand(0, 3) : rand(0, 1));
+  const numGreenFlags = riskScore < 0.35 ? rand(1, 3) : (riskScore < 0.55 ? rand(0, 1) : 0);
+  riskScore += numRedFlags * 0.07;
+  riskScore -= numGreenFlags * 0.05;
   riskScore = clamp(riskScore, 0.05, 0.95);
 
-  const selectedRedFlags = [];
-  const redPool = [...RED_FLAGS];
-  for (let i = 0; i < numRedFlags; i++) {
-    const idx = rand(0, redPool.length - 1);
-    selectedRedFlags.push(redPool.splice(idx, 1)[0]);
-  }
-
-  const selectedGreenFlags = [];
-  const greenPool = [...GREEN_FLAGS];
-  for (let i = 0; i < numGreenFlags; i++) {
-    const idx = rand(0, greenPool.length - 1);
-    selectedGreenFlags.push(greenPool.splice(idx, 1)[0]);
-  }
+  const selectedRedFlags = pickN(RED_FLAGS, numRedFlags);
+  const selectedGreenFlags = pickN(GREEN_FLAGS, numGreenFlags);
 
   // "Fair" premium
   let fairPremium = tiv * coverage.baseRate * industry.riskMod * loc.catRisk;
-  fairPremium *= (1 + (claimsFiveYear * 0.08));
-  fairPremium *= (1 + numRedFlags * 0.1);
+  fairPremium *= (1 + (claimsFiveYear * 0.1));
+  fairPremium *= (1 + numRedFlags * 0.12);
   fairPremium *= (1 - numGreenFlags * 0.05);
 
   // Cat event modifier
@@ -684,7 +850,7 @@ function generateSubmission() {
   fairPremium *= catMod;
   fairPremium = Math.round(fairPremium / 100) * 100;
 
-  // Loss chance (used after binding to determine if claim happens)
+  // Loss chance
   let lossChance = riskScore * DIFFICULTY[state.difficulty].lossChance;
   if (state.activeCatEvent) {
     const ce = state.activeCatEvent;
@@ -693,28 +859,83 @@ function generateSubmission() {
     if (lineMatch && stateMatch) lossChance *= ce.lossChanceMod;
     else if (lineMatch || stateMatch) lossChance *= 1 + (ce.lossChanceMod - 1) * 0.3;
   }
-  lossChance = clamp(lossChance, 0.03, 0.85);
+  lossChance = clamp(lossChance, 0.05, 0.90);
+
+  // Pick 3 carriers for this submission
+  const availableCarriers = selectCarriersForSubmission(industry, coverage, tiv, fairPremium);
+
+  // Suggested limit and retention
+  const suggestedLimit = tiv < 2000000 ? 1000000 : (tiv < 10000000 ? 2000000 : 5000000);
+  const suggestedRetention = fairPremium < 20000 ? 10000 : (fairPremium < 50000 ? 25000 : 50000);
 
   return {
     name: pick(INSURED_NAMES),
     industry, coverage, state: loc,
     tiv, yearsInBusiness, employees,
-    priorLosses, claimsFiveYear,
+    priorLosses, claimsFiveYear, currentCarrier,
     redFlags: selectedRedFlags,
     greenFlags: selectedGreenFlags,
     riskScore,
     fairPremium,
     lossChance,
-    catMod
+    catMod,
+    carriers: availableCarriers,
+    suggestedLimit,
+    suggestedRetention,
+    isSurplus: loc.surplus || industry.riskMod > 1.3 || numRedFlags > 1
   };
+}
+
+function selectCarriersForSubmission(industry, coverage, tiv, fairPremium) {
+  // Score each carrier for this risk
+  const scored = CARRIERS.map(c => {
+    const appetiteScore = c.appetite[industry.class] || 0;
+    const rel = getCarrierRelationship(c.name);
+    const tivOk = tiv <= c.maxTIV;
+    const premOk = fairPremium >= c.minPremium;
+    const suspended = rel.score < 20;
+
+    let available = appetiteScore > 0 && tivOk && premOk && !suspended;
+    // Some randomness — carriers can pass even if technically available
+    if (available && appetiteScore === 1 && Math.random() < 0.3) available = false;
+
+    return {
+      carrier: c,
+      appetiteScore,
+      available,
+      suspended,
+      tivOk,
+      premOk,
+      reason: suspended ? 'Relationship suspended' : (!tivOk ? `TIV exceeds ${fmtShort(c.maxTIV)} capacity` : (!premOk ? `Below ${fmtShort(c.minPremium)} minimum premium` : (appetiteScore === 0 ? 'Outside appetite' : 'No capacity')))
+    };
+  });
+
+  // Pick up to 3: try to get at least 1 available
+  const available = scored.filter(s => s.available).sort((a, b) => b.appetiteScore - a.appetiteScore);
+  const unavailable = scored.filter(s => !s.available);
+
+  let selected = [];
+  // Always show 1-2 available if possible
+  const numAvail = Math.min(available.length, rand(1, 3));
+  selected = available.slice(0, numAvail);
+  // Fill rest with unavailable
+  while (selected.length < 3 && unavailable.length > 0) {
+    selected.push(unavailable.splice(rand(0, unavailable.length - 1), 1)[0]);
+  }
+  // Shuffle
+  selected.sort(() => Math.random() - 0.5);
+  return selected;
 }
 
 // ====== RENDER SUBMISSION ======
 function renderSubmission(sub) {
   const card = document.getElementById('submission-card');
+  state.selectedCarrierIdx = -1;
+  state.activeSlider = 0;
+
   const sliderMin = Math.round(sub.fairPremium * 0.3 / 100) * 100;
   const sliderMax = Math.round(sub.fairPremium * 2.5 / 100) * 100;
-  const sliderDefault = Math.round(sub.fairPremium * randf(0.7, 1.3) / 100) * 100;
+  const sliderDefault = Math.round(sub.fairPremium * randf(0.6, 1.4) / 100) * 100;
 
   function flagClass(val, thresholds) {
     if (val <= thresholds[0]) return 'flag-green';
@@ -722,10 +943,26 @@ function renderSubmission(sub) {
     return 'flag-red';
   }
 
+  const appetiteLabel = (score) => {
+    if (score === 2) return '<span class="carrier-appetite appetite-high">HIGH APPETITE</span>';
+    if (score === 1) return '<span class="carrier-appetite appetite-medium">MODERATE</span>';
+    return '<span class="carrier-appetite appetite-low">LOW</span>';
+  };
+
+  // Find available limit options based on TIV
+  const limitOpts = LIMIT_OPTIONS.filter(l => l <= sub.tiv * 2);
+  const defaultLimitIdx = limitOpts.findIndex(l => l >= sub.suggestedLimit) || 0;
+
+  const retentionOpts = RETENTION_OPTIONS.filter(r => r <= sub.fairPremium * 2);
+  const defaultRetIdx = retentionOpts.findIndex(r => r >= sub.suggestedRetention) || 0;
+
   card.innerHTML = `
     <div class="submission-header">
       <div class="insured-name">${sub.name}</div>
-      <div class="coverage-type">${sub.coverage.name}</div>
+      <div class="header-badges">
+        <span class="badge badge-coverage">${sub.coverage.name}</span>
+        ${sub.isSurplus ? '<span class="badge badge-surplus">SURPLUS LINES</span>' : ''}
+      </div>
     </div>
     <div class="risk-details">
       <div class="risk-detail">
@@ -742,44 +979,120 @@ function renderSubmission(sub) {
       </div>
       <div class="risk-detail">
         <span class="label">Years in Business</span>
-        <span class="value ${sub.yearsInBusiness < 5 ? 'flag-yellow' : 'flag-green'}">${sub.yearsInBusiness}</span>
+        <span class="value ${sub.yearsInBusiness < 3 ? 'flag-red' : sub.yearsInBusiness < 8 ? 'flag-yellow' : 'flag-green'}">${sub.yearsInBusiness}</span>
       </div>
       <div class="risk-detail">
         <span class="label">Employees</span>
         <span class="value">${sub.employees.toLocaleString()}</span>
       </div>
       <div class="risk-detail">
-        <span class="label">Prior Losses (5yr)</span>
-        <span class="value ${flagClass(sub.claimsFiveYear, [1, 3])}">${sub.claimsFiveYear}</span>
+        <span class="label">Claims (5yr)</span>
+        <span class="value ${flagClass(sub.claimsFiveYear, [1, 4])}">${sub.claimsFiveYear}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">Prior Carrier</span>
+        <span class="value ${sub.currentCarrier.includes('non-renewed') ? 'flag-red' : sub.currentCarrier.includes('disclose') ? 'flag-yellow' : sub.currentCarrier === 'None — new venture' ? 'flag-yellow' : ''}" style="font-size:0.72rem">${sub.currentCarrier}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">Prior Losses</span>
+        <span class="value ${flagClass(sub.priorLosses, [1, 3])}">${sub.priorLosses}</span>
+      </div>
+      <div class="risk-detail">
+        <span class="label">Requested</span>
+        <span class="value">${fmtShort(sub.suggestedLimit)} / ${fmtShort(sub.suggestedRetention)} ret.</span>
       </div>
     </div>
-    ${sub.redFlags.length ? `
-    <div class="red-flags">
-      <div class="red-flags-title">Underwriter Notes</div>
-      <div class="red-flags-list">${sub.redFlags.map(f => '&bull; ' + f).join('<br>')}</div>
-    </div>` : ''}
-    ${sub.greenFlags.length ? `
-    <div class="green-flags">
-      <div class="green-flags-title">Positive Indicators</div>
-      <div class="green-flags-list">${sub.greenFlags.map(f => '&bull; ' + f).join('<br>')}</div>
-    </div>` : ''}
-    <div class="premium-section">
-      <span class="premium-label">Your Premium:</span>
-      <div class="premium-slider-wrap">
-        <input type="range" class="premium-slider" id="premium-slider"
-          min="${sliderMin}" max="${sliderMax}" value="${sliderDefault}" step="500">
-      </div>
-      <div class="premium-display" id="premium-display">${fmt(sliderDefault)}</div>
+
+    <div class="flags-row">
+      ${sub.redFlags.length ? `
+      <div class="red-flags">
+        <div class="flags-title">Underwriter Notes</div>
+        <div class="flags-list">${sub.redFlags.map(f => '&bull; ' + f).join('<br>')}</div>
+      </div>` : '<div></div>'}
+      ${sub.greenFlags.length ? `
+      <div class="green-flags">
+        <div class="flags-title">Positive Indicators</div>
+        <div class="flags-list">${sub.greenFlags.map(f => '&bull; ' + f).join('<br>')}</div>
+      </div>` : '<div></div>'}
     </div>
-    <div class="premium-hint">Slide to set your premium before binding</div>
+
+    <div class="carrier-section">
+      <div class="carrier-section-title">Select Carrier (1/2/3)</div>
+      <div class="carrier-options">
+        ${sub.carriers.map((sc, i) => {
+          const rel = getCarrierRelationship(sc.carrier.name);
+          const relLabel = carrierRelationshipLabel(rel.score);
+          return `
+          <div class="carrier-card ${sc.available ? '' : 'unavailable'}" data-idx="${i}" onclick="selectCarrier(${i})">
+            <div class="carrier-name">${sc.carrier.name}</div>
+            <div class="carrier-detail">
+              Rating: <span>${sc.carrier.rating}</span> &bull; Commission: <span>${Math.round(sc.carrier.commission * 100)}%</span>
+            </div>
+            <div class="carrier-detail">
+              Max TIV: <span>${fmtShort(sc.carrier.maxTIV)}</span> &bull; Min Prem: <span>${fmtShort(sc.carrier.minPremium)}</span>
+            </div>
+            ${sc.available ?
+              appetiteLabel(sc.appetiteScore) :
+              `<span class="carrier-appetite appetite-none">${sc.reason}</span>`
+            }
+            <div class="carrier-relationship" style="color:${relLabel.color}">${relLabel.text} (${rel.score}/100)</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="control-group" data-slider="0">
+        <label>Premium</label>
+        <div class="control-display" id="premium-display">${fmt(sliderDefault)}</div>
+        <input type="range" id="premium-slider" min="${sliderMin}" max="${sliderMax}" value="${sliderDefault}" step="500">
+        <div class="control-hint">Market: ~${fmtShort(sub.fairPremium * 0.85)}–${fmtShort(sub.fairPremium * 1.15)}</div>
+      </div>
+      <div class="control-group" data-slider="1">
+        <label>Limit</label>
+        <div class="control-display" id="limit-display">${fmtShort(limitOpts[defaultLimitIdx] || limitOpts[0])}</div>
+        <input type="range" id="limit-slider" min="0" max="${limitOpts.length - 1}" value="${defaultLimitIdx}" step="1">
+        <div class="control-hint" id="limit-hint">Higher limit = more exposure</div>
+      </div>
+      <div class="control-group" data-slider="2">
+        <label>Retention (SIR)</label>
+        <div class="control-display" id="retention-display">${fmtShort(retentionOpts[defaultRetIdx] || retentionOpts[0])}</div>
+        <input type="range" id="retention-slider" min="0" max="${retentionOpts.length - 1}" value="${defaultRetIdx}" step="1">
+        <div class="control-hint">Higher = less carrier exposure</div>
+      </div>
+    </div>
+
     <div class="action-buttons">
-      <button class="action-btn bind-btn" onclick="handleBind()">Bind It</button>
-      <button class="action-btn decline-btn" onclick="handleDecline()">Decline</button>
+      <button class="action-btn bind-btn" onclick="handleBind()">Bind (B)</button>
+      <button class="action-btn refer-btn" onclick="handleRefer()">Refer (R)</button>
+      <button class="action-btn decline-btn" onclick="handleDecline()">Decline (D)</button>
     </div>
   `;
 
+  // Slider listeners
   document.getElementById('premium-slider').addEventListener('input', e => {
     document.getElementById('premium-display').textContent = fmt(parseInt(e.target.value));
+  });
+  document.getElementById('limit-slider').addEventListener('input', e => {
+    const val = limitOpts[parseInt(e.target.value)];
+    document.getElementById('limit-display').textContent = fmtShort(val);
+  });
+  document.getElementById('retention-slider').addEventListener('input', e => {
+    const val = retentionOpts[parseInt(e.target.value)];
+    document.getElementById('retention-display').textContent = fmtShort(val);
+  });
+
+  // Store options for retrieval
+  card._limitOpts = limitOpts;
+  card._retentionOpts = retentionOpts;
+}
+
+function selectCarrier(idx) {
+  const sub = state.currentSubmission;
+  if (!sub.carriers[idx].available) return;
+  state.selectedCarrierIdx = idx;
+  document.querySelectorAll('.carrier-card').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
   });
 }
 
@@ -789,7 +1102,6 @@ function startTimer() {
   state.timeLeft = diff.time;
   state.timePerRound = diff.time;
   updateTimerDisplay();
-
   state.timerInterval = setInterval(() => {
     state.timeLeft -= 0.1;
     updateTimerDisplay();
@@ -801,30 +1113,53 @@ function startTimer() {
 }
 
 function updateTimerDisplay() {
-  document.getElementById('hud-timer').textContent = Math.ceil(state.timeLeft) + 's';
-  const pctLeft = (state.timeLeft / state.timePerRound) * 100;
+  const t = Math.max(0, state.timeLeft);
+  document.getElementById('hud-timer').textContent = Math.ceil(t) + 's';
+  const pctLeft = (t / state.timePerRound) * 100;
   document.getElementById('timer-bar').style.width = pctLeft + '%';
-
   const timerEl = document.getElementById('hud-timer');
-  if (state.timeLeft < 5) timerEl.style.color = 'var(--red)';
-  else if (state.timeLeft < 10) timerEl.style.color = 'var(--orange)';
+  if (t < 5) timerEl.style.color = 'var(--red)';
+  else if (t < 10) timerEl.style.color = 'var(--orange)';
   else timerEl.style.color = 'var(--orange)';
 }
 
-function stopTimer() {
-  clearInterval(state.timerInterval);
-}
+function stopTimer() { clearInterval(state.timerInterval); }
 
 // ====== HUD ======
 function updateHUD() {
   document.getElementById('hud-revenue').textContent = fmt(state.revenue);
+  const revEl = document.getElementById('hud-revenue');
+  revEl.style.color = state.revenue >= 0 ? 'var(--green)' : 'var(--red)';
+
   const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
   const lrEl = document.getElementById('hud-loss-ratio');
   lrEl.textContent = pct(lr);
   if (lr > 0.7) lrEl.style.color = 'var(--red)';
   else if (lr > 0.5) lrEl.style.color = 'var(--orange)';
   else lrEl.style.color = 'var(--green)';
+
+  const cr = state.totalPremium > 0 ? (state.totalLosses + state.totalExpenses) / state.totalPremium : 0;
+  const crEl = document.getElementById('hud-combined');
+  crEl.textContent = pct(cr);
+  if (cr > 0.9) crEl.style.color = 'var(--red)';
+  else if (cr > 0.7) crEl.style.color = 'var(--orange)';
+  else crEl.style.color = 'var(--green)';
+
   document.getElementById('hud-round').textContent = `${state.round} / ${state.totalRounds}`;
+
+  // LR warning
+  const warn = document.getElementById('lr-warning');
+  const fireThresh = DIFFICULTY[state.difficulty].fireThreshold;
+  if (lr > fireThresh - 0.2 && state.totalBinds > 2) {
+    warn.classList.add('active');
+    if (lr > fireThresh - 0.1) {
+      warn.textContent = `CRITICAL: Loss ratio at ${pct(lr)}! You'll lose your binding authority at ${pct(fireThresh)}!`;
+    } else {
+      warn.textContent = `Warning: Loss ratio at ${pct(lr)}. Carriers pull authority at ${pct(fireThresh)}.`;
+    }
+  } else {
+    warn.classList.remove('active');
+  }
 }
 
 // ====== CAT EVENTS ======
@@ -837,9 +1172,9 @@ function maybeTriggerCatEvent() {
     }
     return;
   }
-  if (Math.random() < 0.15 && state.round > 2) {
+  if (Math.random() < 0.18 && state.round > 2) {
     state.activeCatEvent = pick(CAT_EVENTS);
-    state.catEventRoundsLeft = rand(2, 4);
+    state.catEventRoundsLeft = rand(2, 5);
     const banner = document.getElementById('event-banner');
     const stateStr = state.activeCatEvent.states ? ` (${state.activeCatEvent.states.join(', ')})` : ' (All states)';
     banner.textContent = `Market Event: ${state.activeCatEvent.name}${stateStr} — Rates hardening!`;
@@ -848,54 +1183,187 @@ function maybeTriggerCatEvent() {
 }
 
 // ====== ACTIONS ======
+function getSelectedTerms() {
+  const card = document.getElementById('submission-card');
+  const premium = parseInt(document.getElementById('premium-slider').value);
+  const limitIdx = parseInt(document.getElementById('limit-slider').value);
+  const retIdx = parseInt(document.getElementById('retention-slider').value);
+  const limit = card._limitOpts[limitIdx];
+  const retention = card._retentionOpts[retIdx];
+  return { premium, limit, retention };
+}
+
 function handleBind() {
   stopTimer();
   const sub = state.currentSubmission;
-  const premium = parseInt(document.getElementById('premium-slider').value);
-  const commission = Math.round(premium * 0.15);
   const diff = DIFFICULTY[state.difficulty];
 
-  // Did a loss occur?
-  let lossOccurred = Math.random() < sub.lossChance;
-  // Premium adequacy affects severity
+  if (state.selectedCarrierIdx < 0) {
+    // Flash carrier section
+    document.querySelector('.carrier-section-title').style.color = 'var(--red)';
+    setTimeout(() => {
+      document.querySelector('.carrier-section-title').style.color = '';
+    }, 600);
+    startTimer(); // resume timer — you wasted time!
+    return;
+  }
+
+  const selectedCarrier = sub.carriers[state.selectedCarrierIdx];
+  const { premium, limit, retention } = getSelectedTerms();
+  const commission = Math.round(premium * selectedCarrier.carrier.commission);
+
+  // Overpricing check — insured shops elsewhere
   const premiumRatio = premium / sub.fairPremium;
+  if (premiumRatio > diff.overpriceThreshold && Math.random() < (premiumRatio - diff.overpriceThreshold) * 2) {
+    state.totalDeclines++;
+    state.badDeclines++;
+    const penalty = -Math.round(premium * 0.02);
+    state.revenue += penalty;
+    state.history.push({ action: 'shopped', sub, premium, carrier: selectedCarrier.carrier.name });
+    updateHUD();
+    showFeedback({
+      icon: '🏃',
+      title: 'Insured Shopped It!',
+      detail: `Your premium of ${fmt(premium)} was too far above market. The retailer placed it with a competitor. You wasted everyone's time and damaged the relationship.`,
+      score: penalty,
+      positive: false
+    });
+    return;
+  }
+
+  // Carrier minimum premium check
+  if (premium < selectedCarrier.carrier.minPremium) {
+    showFeedback({
+      icon: '🚫',
+      title: 'Below Carrier Minimum',
+      detail: `${selectedCarrier.carrier.name} requires a minimum premium of ${fmtShort(selectedCarrier.carrier.minPremium)}. Adjust your pricing or select a different carrier.`,
+      score: 0,
+      positive: false,
+      noAdvance: true
+    });
+    startTimer();
+    return;
+  }
+
+  // Loss calculation — affected by limit, retention, and risk
+  let lossChance = sub.lossChance;
+  // Higher limit increases exposure
+  const limitRatio = limit / sub.tiv;
+  lossChance *= (0.7 + limitRatio * 0.6);
+  // Lower retention means more claims hit the policy
+  const retentionEffect = retention / (sub.fairPremium * 0.5);
+  lossChance *= (1.2 - retentionEffect * 0.4);
+  lossChance = clamp(lossChance, 0.05, 0.92);
+
+  const lossOccurred = Math.random() < lossChance;
   let lossAmount = 0;
   let lossDesc = '';
 
   if (lossOccurred) {
-    const severity = randf(0.3, 1.5) * sub.tiv * sub.lossChance;
-    lossAmount = Math.round(severity / 100) * 100;
-    lossDesc = lossAmount > premium * 2 ? 'Catastrophic loss!' : lossAmount > premium ? 'Significant claim filed.' : 'Minor claim filed.';
+    // Loss severity based on limit and risk
+    const severityPct = randf(0.1, 0.8);
+    const rawLoss = limit * severityPct * sub.riskScore;
+    // Retention reduces the loss
+    lossAmount = Math.max(0, Math.round((rawLoss - retention) / 100) * 100);
+    if (lossAmount <= 0) {
+      // Loss fell within retention — insured eats it
+      lossAmount = 0;
+      lossDesc = 'Claim filed but fell within the retention. The insured absorbed the cost.';
+    } else {
+      lossDesc = lossAmount > premium * 3 ? 'Catastrophic loss! This one\'s going to sting.' :
+                 lossAmount > premium * 1.5 ? 'Significant claim. Your loss ratio just took a hit.' :
+                 lossAmount > premium * 0.5 ? 'Moderate claim filed.' : 'Attritional loss. Manageable.';
+    }
   }
 
   // Pricing feedback
   let pricingFeedback = '';
-  if (premiumRatio < 0.6) pricingFeedback = 'Severely underpriced! You left money on the table and took on too much risk.';
-  else if (premiumRatio < 0.85) pricingFeedback = 'Below market rate. Competitive, but thin margins.';
-  else if (premiumRatio < 1.15) pricingFeedback = 'Right in the sweet spot. Well priced.';
-  else if (premiumRatio < 1.5) pricingFeedback = 'Above market. Good margin if the risk warrants it.';
-  else pricingFeedback = 'Way above market! The insured might shop this elsewhere.';
+  if (premiumRatio < 0.5) pricingFeedback = 'Catastrophically underpriced. This is how wholesalers go bankrupt.';
+  else if (premiumRatio < 0.7) pricingFeedback = 'Well below market. You\'re buying business at the carriers\' expense.';
+  else if (premiumRatio < 0.9) pricingFeedback = 'Slightly below market. Competitive but thin.';
+  else if (premiumRatio < 1.1) pricingFeedback = 'Right at market. Well priced.';
+  else if (premiumRatio < 1.3) pricingFeedback = 'Above market — good margin if justified.';
+  else pricingFeedback = 'Premium is aggressive. Insured may not renew.';
 
-  // Revenue: commission minus any loss impact on your results
-  const netResult = commission - (lossOccurred ? Math.round(lossAmount * 0.1) : 0);
+  // Limit/retention feedback
+  let termsFeedback = '';
+  if (limit > sub.tiv * 0.8) termsFeedback += ' High limit relative to TIV — significant exposure.';
+  if (retention < sub.fairPremium * 0.1) termsFeedback += ' Very low retention — you\'re absorbing small claims too.';
+  if (retention > sub.fairPremium * 1.5) termsFeedback += ' Generous retention — good risk transfer for the carrier.';
+
+  const expenses = Math.round(premium * 0.08); // expense ratio
+  const netResult = commission - (lossOccurred && lossAmount > 0 ? Math.round(lossAmount * 0.12) : 0);
   state.revenue += netResult;
   state.totalPremium += premium;
   state.totalLosses += lossAmount;
+  state.totalExpenses += expenses;
   state.totalBinds++;
 
-  if (lossOccurred) state.badBinds++;
+  if (lossOccurred && lossAmount > 0) state.badBinds++;
   else state.goodBinds++;
 
-  state.history.push({ action: 'bind', sub, premium, commission, lossOccurred, lossAmount, netResult });
+  updateCarrierRelationship(selectedCarrier.carrier.name, lossOccurred && lossAmount > 0, lossAmount, premium);
+
+  state.history.push({
+    action: 'bind', sub, premium, limit, retention,
+    carrier: selectedCarrier.carrier.name,
+    commission, lossOccurred, lossAmount, netResult
+  });
   updateHUD();
 
-  // Show feedback
+  // Check for firing
+  const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
+  if (lr > diff.fireThreshold && state.totalBinds > 3) {
+    state.firedReason = `Your loss ratio hit ${pct(lr)}. The carriers have revoked your binding authority.`;
+    endGame();
+    return;
+  }
+
+  const lossStr = lossOccurred && lossAmount > 0 ? lossDesc : (lossOccurred ? lossDesc : '');
   showFeedback({
-    icon: lossOccurred ? (lossAmount > premium * 2 ? '💀' : '⚠️') : '✅',
-    title: lossOccurred ? 'Claim Filed!' : 'Clean Bind!',
-    detail: `${lossOccurred ? lossDesc + ' ' : ''}${pricingFeedback}<br><br>Commission: ${fmt(commission)}${lossOccurred ? '<br>Loss: ' + fmt(lossAmount) : ''}`,
+    icon: lossOccurred && lossAmount > 0 ? (lossAmount > premium * 2 ? '💀' : '⚠️') : (lossOccurred ? '🛡️' : '✅'),
+    title: lossOccurred && lossAmount > 0 ? 'Claim Filed!' : (lossOccurred ? 'Retention Absorbed It' : 'Clean Bind!'),
+    detail: `${lossStr ? lossStr + '<br><br>' : ''}${pricingFeedback}${termsFeedback}`,
+    breakdown: {
+      'Carrier': selectedCarrier.carrier.name,
+      'Commission': fmt(commission),
+      'Limit': fmtShort(limit),
+      'Retention': fmtShort(retention),
+      ...(lossOccurred && lossAmount > 0 ? { 'Loss': fmt(lossAmount) } : {}),
+      'Net': fmt(netResult)
+    },
     score: netResult,
     positive: netResult >= 0
+  });
+}
+
+function handleRefer() {
+  stopTimer();
+  const sub = state.currentSubmission;
+  const { premium } = getSelectedTerms();
+
+  // Referring takes time but avoids bad risk and doesn't hurt as much as blind decline
+  state.totalRefers++;
+  const referCost = -Math.round(sub.fairPremium * 0.005); // small cost for the admin work
+  state.revenue += referCost;
+  state.history.push({ action: 'refer', sub, scoreImpact: referCost });
+  updateHUD();
+
+  // Outcome — did the underwriter eventually bind or decline?
+  const wouldBind = sub.riskScore < 0.6 && Math.random() > sub.riskScore;
+  const referDetail = wouldBind
+    ? `The carrier underwriter reviewed it and bound it directly. You still earned a small override, but lost the full commission.`
+    : `The carrier underwriter reviewed it and declined. Good call not using your authority on this one.`;
+
+  const referBonus = wouldBind ? Math.round(sub.fairPremium * 0.02) : Math.round(sub.fairPremium * 0.01);
+  state.revenue += referBonus;
+
+  showFeedback({
+    icon: '📋',
+    title: 'Referred to Underwriter',
+    detail: `You passed this to the carrier for manual review instead of using your binding authority.<br><br>${referDetail}`,
+    score: referCost + referBonus,
+    positive: referCost + referBonus >= 0
   });
 }
 
@@ -903,22 +1371,21 @@ function handleDecline() {
   stopTimer();
   const sub = state.currentSubmission;
 
-  // Was it actually a good risk to decline?
   const wouldHaveLost = Math.random() < sub.lossChance;
   let feedback = '';
   let scoreImpact = 0;
 
-  if (sub.riskScore > 0.5) {
+  if (sub.riskScore > 0.55) {
     feedback = 'Smart pass. This had red flags all over it.' + (wouldHaveLost ? ' And a claim would have hit!' : '');
-    scoreImpact = Math.round(sub.fairPremium * 0.02);
+    scoreImpact = Math.round(sub.fairPremium * 0.015);
     state.goodDeclines++;
   } else if (sub.riskScore > 0.3) {
-    feedback = 'Borderline call. ' + (wouldHaveLost ? 'Turns out a loss would have occurred. Good instinct.' : 'This was actually decent business you passed on.');
-    scoreImpact = wouldHaveLost ? Math.round(sub.fairPremium * 0.01) : -Math.round(sub.fairPremium * 0.01);
+    feedback = 'Borderline call. ' + (wouldHaveLost ? 'Turns out a loss would have occurred. Good instinct.' : 'This was decent business you passed on. The retailer won\'t forget.');
+    scoreImpact = wouldHaveLost ? Math.round(sub.fairPremium * 0.01) : -Math.round(sub.fairPremium * 0.02);
     if (wouldHaveLost) state.goodDeclines++; else state.badDeclines++;
   } else {
-    feedback = 'That was a quality submission! Your competitors are going to write this one happily.';
-    scoreImpact = -Math.round(sub.fairPremium * 0.03);
+    feedback = 'That was a quality submission! Your competitors are going to write this happily. The retailer is reconsidering your wholesaler panel.';
+    scoreImpact = -Math.round(sub.fairPremium * 0.04);
     state.badDeclines++;
   }
 
@@ -940,34 +1407,51 @@ function handleTimeout() {
   const sub = state.currentSubmission;
   state.totalDeclines++;
   state.badDeclines++;
-  const penalty = -Math.round(sub.fairPremium * 0.04);
+  const penalty = -Math.round(sub.fairPremium * 0.05);
   state.revenue += penalty;
   state.history.push({ action: 'timeout', sub, scoreImpact: penalty });
   updateHUD();
 
   showFeedback({
     icon: '⏰',
-    title: 'Time\'s Up!',
-    detail: 'The submission expired. The retailer moved on to another wholesaler. You lost reputation.',
+    title: 'Submission Expired!',
+    detail: 'The retailer pulled the submission and sent it to a competing wholesaler. Your reputation takes a hit.',
     score: penalty,
     positive: false
   });
 }
 
 // ====== FEEDBACK ======
-function showFeedback({ icon, title, detail, score, positive }) {
+function showFeedback({ icon, title, detail, score, positive, breakdown, noAdvance }) {
   const overlay = document.getElementById('feedback-overlay');
   const card = document.getElementById('feedback-card');
+
+  let breakdownHTML = '';
+  if (breakdown) {
+    breakdownHTML = '<div class="feedback-breakdown">' +
+      Object.entries(breakdown).map(([k, v]) =>
+        `<div class="fb-item"><span class="fb-label">${k}</span><span class="fb-val">${v}</span></div>`
+      ).join('') + '</div>';
+  }
+
+  const btnText = noAdvance ? 'Got it' :
+    (state.round >= state.totalRounds && !state.firedReason ? 'See Results' : 'Next Submission →');
+  const btnAction = noAdvance ? 'closeFeedback()' : 'nextRound()';
+
   card.innerHTML = `
     <div class="feedback-icon">${icon}</div>
     <div class="feedback-title">${title}</div>
     <div class="feedback-detail">${detail}</div>
+    ${breakdownHTML}
     <div class="feedback-score ${positive ? 'positive' : 'negative'}">${score >= 0 ? '+' : ''}${fmt(score)}</div>
-    <button class="next-btn" onclick="nextRound()">
-      ${state.round >= state.totalRounds ? 'See Results' : 'Next Submission →'}
-    </button>
+    <button class="next-btn" onclick="${btnAction}">${btnText}</button>
   `;
   overlay.classList.add('active');
+}
+
+function closeFeedback() {
+  document.getElementById('feedback-overlay').classList.remove('active');
+  startTimer();
 }
 
 // ====== FLOW ======
@@ -977,8 +1461,10 @@ function startGame() {
   state.revenue = 0;
   state.totalPremium = 0;
   state.totalLosses = 0;
+  state.totalExpenses = 0;
   state.totalBinds = 0;
   state.totalDeclines = 0;
+  state.totalRefers = 0;
   state.goodBinds = 0;
   state.badBinds = 0;
   state.goodDeclines = 0;
@@ -988,8 +1474,11 @@ function startGame() {
   state.catEventRoundsLeft = 0;
   state.history = [];
   state.achievements = [];
+  state.firedReason = null;
+  initCarrierRelationships();
 
   document.getElementById('event-banner').classList.remove('active');
+  document.getElementById('lr-warning').classList.remove('active');
   showScreen('game-screen');
   nextRound();
 }
@@ -997,7 +1486,7 @@ function startGame() {
 function nextRound() {
   document.getElementById('feedback-overlay').classList.remove('active');
 
-  if (state.round >= state.totalRounds) {
+  if (state.firedReason || state.round >= state.totalRounds) {
     endGame();
     return;
   }
@@ -1013,41 +1502,62 @@ function nextRound() {
 function endGame() {
   stopTimer();
   document.getElementById('event-banner').classList.remove('active');
+  document.getElementById('lr-warning').classList.remove('active');
 
   const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
-  const bindRate = state.totalBinds / state.totalRounds;
-  const accuracy = (state.goodBinds + state.goodDeclines) / state.totalRounds;
+  const cr = state.totalPremium > 0 ? (state.totalLosses + state.totalExpenses) / state.totalPremium : 0;
+  const bindRate = state.totalRounds > 0 ? state.totalBinds / state.totalRounds : 0;
+  const accuracy = state.totalRounds > 0 ? (state.goodBinds + state.goodDeclines) / Math.max(1, state.totalBinds + state.totalDeclines) : 0;
 
-  // Grade
   let grade, gradeColor;
-  const score = state.revenue / 1000 + (accuracy * 50) - (lr * 80);
-  if (score > 60) { grade = 'A+'; gradeColor = '#00b894'; }
-  else if (score > 40) { grade = 'A'; gradeColor = '#00b894'; }
-  else if (score > 25) { grade = 'B+'; gradeColor = '#4f8cff'; }
-  else if (score > 10) { grade = 'B'; gradeColor = '#4f8cff'; }
-  else if (score > 0) { grade = 'C'; gradeColor = '#f39c12'; }
-  else if (score > -15) { grade = 'D'; gradeColor = '#e74c3c'; }
-  else { grade = 'F'; gradeColor = '#e74c3c'; }
+  if (state.firedReason) {
+    grade = 'F'; gradeColor = '#e74c3c';
+  } else {
+    const score = state.revenue / 1000 + (accuracy * 50) - (lr * 100) - (cr > 1 ? 30 : 0) + (state.totalRefers * 2);
+    if (score > 60) { grade = 'A+'; gradeColor = '#00b894'; }
+    else if (score > 40) { grade = 'A'; gradeColor = '#00b894'; }
+    else if (score > 25) { grade = 'B+'; gradeColor = '#4f8cff'; }
+    else if (score > 10) { grade = 'B'; gradeColor = '#4f8cff'; }
+    else if (score > 0) { grade = 'C'; gradeColor = '#f39c12'; }
+    else if (score > -15) { grade = 'D'; gradeColor = '#e74c3c'; }
+    else { grade = 'F'; gradeColor = '#e74c3c'; }
+  }
 
   // Achievements
   const ach = [];
   if (lr < 0.3 && state.totalBinds > 5) ach.push('Cherry Picker — Loss ratio under 30%');
   if (lr === 0 && state.totalBinds > 0) ach.push('Loss-Free Book — Zero losses!');
-  if (state.totalBinds === state.totalRounds) ach.push('Bind Everything — Never declined');
-  if (state.totalDeclines === state.totalRounds) ach.push('The Gatekeeper — Declined every submission');
+  if (state.totalBinds === state.totalRounds) ach.push('Bind Machine — Never declined');
+  if (state.totalDeclines >= state.totalRounds * 0.7) ach.push('The Gatekeeper — Declined 70%+ of submissions');
   if (state.revenue > 50000) ach.push('Big Producer — Over $50K revenue');
   if (state.revenue > 100000) ach.push('Rainmaker — Over $100K revenue');
+  if (state.revenue > 200000) ach.push('Wholesaler of the Year');
   if (accuracy > 0.8) ach.push('Sharp Eye — 80%+ decision accuracy');
   if (state.goodDeclines > 5) ach.push('Risk Radar — Dodged 5+ bad risks');
   if (state.badDeclines === 0 && state.totalDeclines > 0) ach.push('No Regrets — Every decline was justified');
   if (bindRate > 0.7 && lr < 0.5) ach.push('Volume Player — High bind rate, controlled losses');
+  if (state.totalRefers > 3) ach.push('Team Player — Used referrals wisely');
+  if (cr < 0.6 && state.totalBinds > 5) ach.push('Underwriting Profit — Combined ratio under 60%');
+  if (state.firedReason) ach.push('Fired — Better luck next time');
+  // Check if any carrier relationship is at 0
+  const burnedCarrier = Object.entries(state.carrierRelationships).find(([_, r]) => r.score < 10 && r.binds > 0);
+  if (burnedCarrier) ach.push(`Burned ${burnedCarrier[0].split(' ')[0]} — Relationship destroyed`);
   state.achievements = ach;
+
+  // Carrier report
+  const carrierReport = Object.entries(state.carrierRelationships)
+    .filter(([_, r]) => r.binds > 0)
+    .map(([name, r]) => {
+      const label = carrierRelationshipLabel(r.score);
+      return `<div class="fb-item"><span class="fb-label">${name.split('(')[0].trim()}</span><span class="fb-val" style="color:${label.color}">${r.binds} binds, ${r.losses} losses (${r.score}/100)</span></div>`;
+    }).join('');
 
   const screen = document.getElementById('gameover-screen');
   screen.innerHTML = `
-    <h1>Game Over</h1>
+    <h1>${state.firedReason ? 'You\'re Fired!' : 'Game Over'}</h1>
+    ${state.firedReason ? `<p style="color: var(--red); max-width: 400px; font-size: 0.9rem;">${state.firedReason}</p>` : ''}
     <div class="grade-display" style="color: ${gradeColor}">${grade}</div>
-    <div class="grade-label">Underwriter Grade</div>
+    <div class="grade-label">Underwriter Grade (Round ${state.round}/${state.totalRounds})</div>
     <div class="final-stats">
       <div class="final-stat">
         <div class="label">Total Revenue</div>
@@ -1058,17 +1568,30 @@ function endGame() {
         <div class="value" style="color: ${lr > 0.7 ? 'var(--red)' : lr > 0.5 ? 'var(--orange)' : 'var(--green)'}">${pct(lr)}</div>
       </div>
       <div class="final-stat">
-        <div class="label">Risks Bound</div>
-        <div class="value">${state.totalBinds} / ${state.totalRounds}</div>
+        <div class="label">Combined Ratio</div>
+        <div class="value" style="color: ${cr > 0.9 ? 'var(--red)' : cr > 0.7 ? 'var(--orange)' : 'var(--green)'}">${pct(cr)}</div>
       </div>
       <div class="final-stat">
-        <div class="label">Decision Accuracy</div>
+        <div class="label">Risks Bound</div>
+        <div class="value">${state.totalBinds}</div>
+      </div>
+      <div class="final-stat">
+        <div class="label">Referred</div>
+        <div class="value">${state.totalRefers}</div>
+      </div>
+      <div class="final-stat">
+        <div class="label">Accuracy</div>
         <div class="value">${pct(accuracy)}</div>
       </div>
     </div>
+    ${carrierReport ? `
+    <div style="max-width: 550px; width: 100%;">
+      <p style="color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em;">Carrier Relationships</p>
+      <div class="feedback-breakdown">${carrierReport}</div>
+    </div>` : ''}
     ${ach.length ? `
     <div>
-      <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 0.5rem;">Achievements Unlocked</p>
+      <p style="color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em;">Achievements</p>
       <div class="achievements">
         ${ach.map(a => `<div class="achievement">${a}</div>`).join('')}
       </div>
@@ -1083,22 +1606,40 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// Keyboard shortcuts
+// ====== KEYBOARD ======
 document.addEventListener('keydown', e => {
+  // Feedback overlay
   if (document.getElementById('feedback-overlay').classList.contains('active')) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextRound(); }
     return;
   }
   if (!document.getElementById('game-screen').classList.contains('active')) return;
-  if (e.key === 'b' || e.key === 'B' || e.key === 'Enter') handleBind();
-  else if (e.key === 'd' || e.key === 'D' || e.key === 'Escape') handleDecline();
-  else if (e.key === 'ArrowLeft') {
-    const s = document.getElementById('premium-slider');
-    s.value = parseInt(s.value) - 500;
-    s.dispatchEvent(new Event('input'));
-  } else if (e.key === 'ArrowRight') {
-    const s = document.getElementById('premium-slider');
-    s.value = parseInt(s.value) + 500;
+
+  // Carrier selection
+  if (e.key === '1') selectCarrier(0);
+  else if (e.key === '2') selectCarrier(1);
+  else if (e.key === '3') selectCarrier(2);
+
+  // Actions
+  else if (e.key === 'b' || e.key === 'B') handleBind();
+  else if (e.key === 'd' || e.key === 'D') handleDecline();
+  else if (e.key === 'r' || e.key === 'R') handleRefer();
+
+  // Tab to cycle sliders
+  else if (e.key === 'Tab') {
+    e.preventDefault();
+    state.activeSlider = (state.activeSlider + 1) % 3;
+    const sliders = ['premium-slider', 'limit-slider', 'retention-slider'];
+    document.getElementById(sliders[state.activeSlider]).focus();
+  }
+
+  // Arrow keys for active slider
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    const sliders = ['premium-slider', 'limit-slider', 'retention-slider'];
+    const s = document.getElementById(sliders[state.activeSlider]);
+    const step = state.activeSlider === 0 ? 500 : 1;
+    const delta = e.key === 'ArrowRight' ? step : -step;
+    s.value = parseInt(s.value) + delta;
     s.dispatchEvent(new Event('input'));
   }
 });
