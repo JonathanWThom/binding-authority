@@ -494,6 +494,31 @@
     color: var(--gold);
   }
 
+  .share-row {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .share-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.7rem 1.8rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .share-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79,140,255,0.3); }
+  .share-btn-text {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .share-btn-text:hover { border-color: var(--accent); box-shadow: none; }
+
   /* Responsive */
   @media (max-width: 700px) {
     .hud { grid-template-columns: repeat(3, 1fr); }
@@ -1642,6 +1667,10 @@ function endGame() {
         ${ach.map(a => `<div class="achievement">${a}</div>`).join('')}
       </div>
     </div>` : ''}
+    <div class="share-row">
+      <button class="share-btn" onclick="shareResults('${grade}', ${state.revenue}, '${pct(lr)}', '${pct(cr)}', ${state.totalBinds}, '${pct(accuracy)}', '${state.difficulty}', ${state.firedReason ? 'true' : 'false'}, '${gradeColor}', ${JSON.stringify(ach).replace(/'/g, "\\'")})">${navigator.share ? 'Share Results' : 'Download Results'}</button>
+      <button class="share-btn share-btn-text" onclick="copyTextResults('${grade}', ${state.revenue}, '${pct(lr)}', '${pct(cr)}', ${state.totalBinds}, '${pct(accuracy)}', '${state.difficulty}', ${state.firedReason ? 'true' : 'false'})">Copy Text</button>
+    </div>
     <button class="start-btn" onclick="showScreen('title-screen')">Play Again</button>
   `;
   showScreen('gameover-screen');
@@ -1689,6 +1718,181 @@ document.addEventListener('keydown', e => {
     s.dispatchEvent(new Event('input'));
   }
 });
+
+// ====== SHARE ======
+function renderShareImage(grade, revenue, lr, cr, binds, accuracy, difficulty, fired, gradeColor, achievements) {
+  const W = 1200, H = 630;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const bg = ctx.createRadialGradient(W/2, H*0.3, 0, W/2, H*0.3, W*0.7);
+  bg.addColorStop(0, '#1a2a50');
+  bg.addColorStop(1, '#0a0e1a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle border
+  ctx.strokeStyle = '#2a3555';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 20, W-40, H-40);
+
+  // Title
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#7a8599';
+  ctx.font = '600 16px Inter, system-ui, sans-serif';
+  ctx.fillText('THE BINDING AUTHORITY', W/2, 60);
+
+  // Fired or Game Over
+  ctx.fillStyle = fired ? '#e74c3c' : '#e8eaf0';
+  ctx.font = '800 28px Inter, system-ui, sans-serif';
+  ctx.fillText(fired ? "YOU'RE FIRED!" : 'GAME OVER', W/2, 100);
+
+  // Grade
+  ctx.fillStyle = gradeColor;
+  ctx.font = '900 140px Inter, system-ui, sans-serif';
+  ctx.fillText(grade, W/2, 260);
+
+  // Grade label
+  ctx.fillStyle = '#7a8599';
+  ctx.font = '500 16px Inter, system-ui, sans-serif';
+  const diffLabel = difficulty === 'easy' ? 'Retail' : difficulty === 'medium' ? 'Wholesale' : 'MGA';
+  ctx.fillText(`Underwriter Grade — ${diffLabel} Difficulty`, W/2, 290);
+
+  // Stats row
+  const stats = [
+    { label: 'REVENUE', value: '$' + Math.round(revenue).toLocaleString(), color: revenue >= 0 ? '#00b894' : '#e74c3c' },
+    { label: 'LOSS RATIO', value: lr, color: parseFloat(lr) > 70 ? '#e74c3c' : parseFloat(lr) > 50 ? '#f39c12' : '#00b894' },
+    { label: 'COMBINED', value: cr, color: parseFloat(cr) > 90 ? '#e74c3c' : parseFloat(cr) > 70 ? '#f39c12' : '#00b894' },
+    { label: 'RISKS BOUND', value: String(binds), color: '#e8eaf0' },
+    { label: 'ACCURACY', value: accuracy, color: '#4f8cff' }
+  ];
+
+  const statW = 180, statH = 70;
+  const statStartX = (W - stats.length * statW - (stats.length - 1) * 16) / 2;
+  const statY = 320;
+
+  stats.forEach((s, i) => {
+    const x = statStartX + i * (statW + 16);
+    // Stat box
+    ctx.fillStyle = '#131a2e';
+    ctx.beginPath();
+    ctx.roundRect(x, statY, statW, statH, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#2a3555';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, statY, statW, statH, 10);
+    ctx.stroke();
+
+    // Label
+    ctx.fillStyle = '#7a8599';
+    ctx.font = '600 10px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.label, x + statW/2, statY + 22);
+    // Value
+    ctx.fillStyle = s.color;
+    ctx.font = '800 22px Inter, system-ui, sans-serif';
+    ctx.fillText(s.value, x + statW/2, statY + 52);
+  });
+
+  // Achievements (up to 3)
+  const achToShow = (achievements || []).slice(0, 3);
+  if (achToShow.length > 0) {
+    ctx.fillStyle = '#7a8599';
+    ctx.font = '600 11px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ACHIEVEMENTS', W/2, 425);
+
+    const achY = 440;
+    // Measure widths to center
+    ctx.font = '600 13px Inter, system-ui, sans-serif';
+    const achWidths = achToShow.map(a => ctx.measureText(a).width + 24);
+    const totalAchW = achWidths.reduce((a, b) => a + b, 0) + (achToShow.length - 1) * 8;
+    let achX = (W - totalAchW) / 2;
+
+    achToShow.forEach((a, i) => {
+      const w = achWidths[i];
+      ctx.fillStyle = 'rgba(255,215,0,0.08)';
+      ctx.beginPath();
+      ctx.roundRect(achX, achY, w, 28, 6);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,215,0,0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(achX, achY, w, 28, 6);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '600 13px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(a, achX + w/2, achY + 18);
+      achX += w + 8;
+    });
+  }
+
+  // Footer
+  ctx.fillStyle = '#4a5568';
+  ctx.font = '500 14px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Play at jonathanwthom.github.io/binding-authority', W/2, H - 40);
+
+  return canvas;
+}
+
+async function shareResults(grade, revenue, lr, cr, binds, accuracy, difficulty, fired, gradeColor, achievements) {
+  const canvas = renderShareImage(grade, revenue, lr, cr, binds, accuracy, difficulty, fired, gradeColor, achievements);
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  const file = new File([blob], 'binding-authority-results.png', { type: 'image/png' });
+
+  const diffLabel = difficulty === 'easy' ? 'Retail' : difficulty === 'medium' ? 'Wholesale' : 'MGA';
+  const shareText = `I scored ${grade} on The Binding Authority (${diffLabel} mode)! Revenue: $${Math.round(revenue).toLocaleString()} | Loss Ratio: ${lr}\n\nThink you can underwrite better?`;
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        text: shareText,
+        files: [file],
+        url: 'https://jonathanwthom.github.io/binding-authority/'
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  // Fallback: download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'binding-authority-results.png';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyTextResults(grade, revenue, lr, cr, binds, accuracy, difficulty, fired) {
+  const diffLabel = difficulty === 'easy' ? 'Retail' : difficulty === 'medium' ? 'Wholesale' : 'MGA';
+  const text = [
+    `The Binding Authority — ${diffLabel} Mode`,
+    fired ? `FIRED!` : `Grade: ${grade}`,
+    `Revenue: $${Math.round(revenue).toLocaleString()}`,
+    `Loss Ratio: ${lr} | Combined: ${cr}`,
+    `Risks Bound: ${binds} | Accuracy: ${accuracy}`,
+    ``,
+    `Think you can underwrite better?`,
+    `jonathanwthom.github.io/binding-authority`
+  ].join('\n');
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-btn-text');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+}
 </script>
 </body>
 </html>
