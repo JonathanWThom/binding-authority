@@ -616,18 +616,18 @@ const INSURED_NAMES = [
 ];
 
 const COVERAGE_TYPES = [
-  { name: "General Liability", baseRate: 0.005, abbr: "GL", exposureLabel: "Revenue" },
-  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O", exposureLabel: "Revenue" },
-  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP", exposureLabel: "TIV" },
-  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS", exposureLabel: "Underlying Premium" },
-  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA", exposureLabel: "Fleet Value" },
-  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC", exposureLabel: "Annual Payroll" },
-  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber", exposureLabel: "Revenue" },
-  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O", exposureLabel: "Total Assets" },
-  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro", exposureLabel: "TIV" },
-  { name: "Product Liability", baseRate: 0.008, abbr: "PL", exposureLabel: "Revenue" },
-  { name: "Inland Marine", baseRate: 0.005, abbr: "IM", exposureLabel: "TIV" },
-  { name: "Builders Risk", baseRate: 0.006, abbr: "BR", exposureLabel: "Project Value" }
+  { name: "General Liability", baseRate: 0.005, abbr: "GL", exposureLabel: "Revenue", industries: null },
+  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O", exposureLabel: "Revenue", industries: ["Healthcare", "Technology", "Professional Services", "Real Estate"] },
+  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP", exposureLabel: "TIV", industries: null },
+  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS", exposureLabel: "Underlying Premium", industries: null },
+  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA", exposureLabel: "Fleet Value", industries: ["Construction", "Manufacturing", "Transportation", "Energy / Oil & Gas", "Agriculture", "Food & Beverage", "Mining", "Retail"] },
+  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC", exposureLabel: "Annual Payroll", industries: null },
+  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber", exposureLabel: "Revenue", industries: ["Technology", "Healthcare", "Professional Services", "Real Estate", "Retail", "Hospitality", "Food & Beverage", "Entertainment / Events"] },
+  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O", exposureLabel: "Total Assets", industries: ["Technology", "Healthcare", "Professional Services", "Cannabis", "Energy / Oil & Gas", "Real Estate"] },
+  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro", exposureLabel: "TIV", industries: ["Construction", "Manufacturing", "Energy / Oil & Gas", "Mining", "Agriculture", "Transportation"] },
+  { name: "Product Liability", baseRate: 0.008, abbr: "PL", exposureLabel: "Revenue", industries: ["Manufacturing", "Food & Beverage", "Cannabis", "Agriculture", "Retail"] },
+  { name: "Inland Marine", baseRate: 0.005, abbr: "IM", exposureLabel: "TIV", industries: ["Construction", "Manufacturing", "Transportation", "Marine", "Energy / Oil & Gas", "Mining", "Agriculture"] },
+  { name: "Builders Risk", baseRate: 0.006, abbr: "BR", exposureLabel: "Project Value", industries: ["Construction", "Real Estate"] }
 ];
 
 const INDUSTRIES = [
@@ -770,9 +770,9 @@ let state = {
 };
 
 const DIFFICULTY = {
-  easy:   { time: 40, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 1.0 },
-  medium: { time: 28, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.90 },
-  hard:   { time: 18, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.80 }
+  easy:   { time: 40, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80 },
+  medium: { time: 28, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70 },
+  hard:   { time: 18, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60 }
 };
 
 // ====== UTILITY ======
@@ -842,7 +842,9 @@ function carrierRelationshipLabel(score) {
 // ====== GENERATE SUBMISSION ======
 function generateSubmission() {
   const industry = pick(INDUSTRIES);
-  const coverage = pick(COVERAGE_TYPES);
+  // Only pick coverage lines that make sense for this industry
+  const compatibleCoverage = COVERAGE_TYPES.filter(c => !c.industries || c.industries.includes(industry.name));
+  const coverage = pick(compatibleCoverage);
   const loc = pick(STATES);
   const tiv = rand(500000, 25000000);
   const yearsInBusiness = rand(1, 50);
@@ -906,7 +908,11 @@ function generateSubmission() {
 
   // Suggested limit and retention
   const suggestedLimit = Math.min(tiv, tiv < 2000000 ? 1000000 : (tiv < 10000000 ? 2000000 : 5000000));
-  const suggestedRetention = fairPremium < 20000 ? 10000 : (fairPremium < 50000 ? 25000 : 50000);
+  // Retention scaled to ~15% of premium, rounded to a clean number
+  const rawRetention = fairPremium * 0.15;
+  const suggestedRetention = rawRetention < 5000 ? Math.round(rawRetention / 1000) * 1000 || 1000
+    : rawRetention < 25000 ? Math.round(rawRetention / 5000) * 5000
+    : Math.round(rawRetention / 10000) * 10000;
 
   return {
     name: pick(INSURED_NAMES),
@@ -993,8 +999,10 @@ function renderSubmission(sub) {
   const limitOpts = LIMIT_OPTIONS.filter(l => l <= sub.tiv * 2);
   const defaultLimitIdx = limitOpts.findIndex(l => l >= sub.suggestedLimit) || 0;
 
-  const retentionOpts = RETENTION_OPTIONS.filter(r => r <= sub.fairPremium * 2);
-  const defaultRetIdx = retentionOpts.findIndex(r => r >= sub.suggestedRetention) || 0;
+  // Build retention options scaled to this submission's premium (5% to 50% of premium)
+  const retentionOpts = RETENTION_OPTIONS.filter(r => r >= sub.fairPremium * 0.03 && r <= sub.fairPremium * 0.6);
+  if (retentionOpts.length === 0) retentionOpts.push(sub.suggestedRetention); // fallback
+  const defaultRetIdx = Math.max(0, retentionOpts.findIndex(r => r >= sub.suggestedRetention));
 
   card.innerHTML = `
     <div class="submission-header">
@@ -1311,13 +1319,18 @@ function handleBind() {
   let lossDesc = '';
 
   if (lossOccurred) {
-    // Loss severity based on limit and risk
-    const severityPct = randf(0.1, 0.8);
-    const rawLoss = limit * severityPct * sub.riskScore;
+    // Loss severity — weighted toward attritional (realistic distribution)
+    // ~55% attritional, ~25% moderate, ~15% significant, ~5% catastrophic
+    const roll = Math.random();
+    let severityMult;
+    if (roll < 0.55) severityMult = randf(0.05, 0.4);       // attritional
+    else if (roll < 0.80) severityMult = randf(0.4, 1.0);    // moderate
+    else if (roll < 0.95) severityMult = randf(1.0, 2.5);    // significant
+    else severityMult = randf(2.5, 5.0);                     // catastrophic
+    const rawLoss = premium * severityMult * (0.5 + sub.riskScore);
     // Retention reduces the loss
     lossAmount = Math.max(0, Math.round((rawLoss - retention) / 100) * 100);
     if (lossAmount <= 0) {
-      // Loss fell within retention — insured eats it
       lossAmount = 0;
       lossDesc = 'Claim filed but fell within the retention. The insured absorbed the cost.';
     } else {
@@ -1336,15 +1349,31 @@ function handleBind() {
   else if (premiumRatio < 1.3) pricingFeedback = 'Above market — good margin if justified.';
   else pricingFeedback = 'Premium is aggressive. Insured may not renew.';
 
-  // Limit/retention feedback
+  // Limit/retention feedback — contextualized to what actually happened
   let termsFeedback = '';
-  if (limit > sub.tiv * 0.8) termsFeedback += ' High limit relative to exposure — significant risk.';
-  if (limit < sub.suggestedLimit * 0.5) termsFeedback += ' Low limit — less exposure but less premium to earn.';
-  if (retention < adjustedFairPremium * 0.1) termsFeedback += ' Very low retention — absorbing small claims too.';
-  if (retention > adjustedFairPremium * 1.5) termsFeedback += ' Generous retention — good risk transfer for the carrier.';
+  if (lossOccurred && lossAmount === 0) {
+    termsFeedback += ` Your ${fmtShort(retention)} retention saved the carrier — the claim fell within it.`;
+  } else if (lossOccurred && lossAmount > 0 && retention > 0) {
+    const withoutRetention = lossAmount + retention;
+    if (retention > lossAmount * 0.3) {
+      termsFeedback += ` The ${fmtShort(retention)} retention absorbed ${fmtShort(retention)} of the ${fmtShort(withoutRetention)} gross loss.`;
+    }
+    const hypotheticalHigherRet = retention * 2;
+    if (hypotheticalHigherRet > lossAmount + retention) {
+      termsFeedback += ` A ${fmtShort(hypotheticalHigherRet)} retention would have kept this off the carrier's books entirely.`;
+    }
+  }
+  if (!lossOccurred) {
+    if (limit > sub.tiv * 0.8) termsFeedback += ' You offered a high limit relative to exposure — more capacity than needed.';
+    if (retention < premium * 0.05) termsFeedback += ' Very low retention — you\'re covering attritional claims the insured could self-fund.';
+    if (retention > premium * 0.3) termsFeedback += ' Strong retention — good risk transfer structure.';
+  }
 
   const expenses = Math.round(premium * 0.08); // expense ratio
-  const netResult = commission - (lossOccurred && lossAmount > 0 ? Math.round(lossAmount * 0.12) : 0);
+  // Broker's loss exposure: commission clawback + profit sharing hit
+  // Bad losses eat your commission and then some (carrier contingent profit sharing)
+  const lossHit = lossOccurred && lossAmount > 0 ? Math.round(Math.min(commission + lossAmount * 0.15, lossAmount * 0.35)) : 0;
+  const netResult = commission - lossHit;
   state.revenue += netResult;
   state.totalPremium += premium;
   state.totalLosses += lossAmount;
