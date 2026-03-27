@@ -1396,24 +1396,28 @@ function handleRefer() {
 
   state.totalRefers++;
 
-  // Referral costs you time — you did the work but didn't use your authority
-  const adminCost = -Math.round(sub.fairPremium * 0.005);
+  // Referring costs real money — you did the submission work, used carrier
+  // resources, and didn't produce. Carriers track hit ratios.
+  const adminCost = -Math.round(sub.fairPremium * 0.02);
 
   // Did the carrier UW eventually bind or decline?
   const wouldBind = sub.riskScore < 0.6 && Math.random() > sub.riskScore;
 
   let referDetail, totalImpact;
   if (wouldBind) {
-    // Carrier bound it — you get a small override but lost the full commission
-    const override = Math.round(sub.fairPremium * 0.015);
+    // Carrier bound it directly — you lost the full commission and only
+    // get a tiny override. The carrier now knows you have authority but
+    // aren't using it, which hurts your standing.
+    const override = Math.round(sub.fairPremium * 0.005);
     totalImpact = adminCost + override;
-    referDetail = `The carrier underwriter reviewed it and bound it directly. You earned a small referral override (${fmt(override)}), but lost the full commission you'd have gotten by binding it yourself.`;
+    const lostCommission = Math.round(premium * 0.15);
+    referDetail = `The carrier underwriter reviewed it and bound it directly. You earned a tiny referral fee (${fmt(override)}) but lost ~${fmt(lostCommission)} in commission. The carrier is questioning why you have binding authority if you won't use it.`;
   } else {
-    // Carrier declined — you avoided risk but earned nothing
+    // Carrier declined — you just wasted their UW's time
     totalImpact = adminCost;
     referDetail = sub.riskScore > 0.5
-      ? `The carrier underwriter reviewed it and declined. You were right to be cautious — this wasn't good business.`
-      : `The carrier underwriter reviewed it and declined. Surprising — this looked like decent business. Either way, you didn't earn anything on it.`;
+      ? `The carrier underwriter reviewed it and declined. Right call to be cautious, but next time just decline it yourself instead of wasting their time.`
+      : `The carrier underwriter reviewed it and declined — surprising given the risk profile. You burned carrier goodwill and earned nothing.`;
   }
 
   state.revenue += totalImpact;
@@ -1421,7 +1425,7 @@ function handleRefer() {
   updateHUD();
 
   showFeedback({
-    icon: wouldBind ? '📋' : (sub.riskScore > 0.5 ? '🛡️' : '📋'),
+    icon: '📋',
     title: 'Referred to Underwriter',
     detail: `You passed this to the carrier for manual review instead of using your binding authority.<br><br>${referDetail}`,
     score: totalImpact,
@@ -1584,7 +1588,8 @@ function endGame() {
   if (state.firedReason) {
     grade = 'F'; gradeColor = '#e74c3c';
   } else {
-    const score = state.revenue / 1000 + (accuracy * 50) - (lr * 100) - (cr > 1 ? 30 : 0) + (state.totalRefers * 2);
+    const referPenalty = Math.max(0, state.totalRefers - Math.round(state.totalRounds * 0.25)) * 5;
+    const score = state.revenue / 1000 + (accuracy * 50) - (lr * 100) - (cr > 1 ? 30 : 0) - referPenalty;
     if (score > 60) { grade = 'A+'; gradeColor = '#00b894'; }
     else if (score > 40) { grade = 'A'; gradeColor = '#00b894'; }
     else if (score > 25) { grade = 'B+'; gradeColor = '#4f8cff'; }
