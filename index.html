@@ -1209,9 +1209,8 @@ function nextRound() {
     state.marketItUsedThisRound = false;
     maybeTriggerCatEvent();
 
-    // After round 10, 40% chance of a renewal if we have bound risks
-    let sub = null;
     // Renewals start after 60% of the game
+    let sub = null;
     const renewalStart = Math.ceil(DIFFICULTY[state.difficulty].rounds * 0.6);
     if (state.round > renewalStart && state.boundRisks.length > 0 && Math.random() < 0.4) {
       sub = generateRenewal();
