@@ -212,14 +212,16 @@
   }
   .renewal-history-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #5b3a8c; margin-bottom: 0.2rem; }
   .risk-hint {
-    display: inline-block;
+    display: block;
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-left: 0.5rem;
+    margin-top: 0.35rem;
+    margin-left: 0;
+    text-align: center;
     border: 1px dashed var(--border);
     background: #fdf6e8;
     color: var(--gold);
@@ -575,6 +577,156 @@
   }
   .share-btn-text:hover { border-color: var(--accent); box-shadow: none; }
 
+  /* Carrier call overlay */
+  .carrier-call-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: rgba(240,235,227,0.88);
+    backdrop-filter: blur(6px);
+  }
+  .carrier-call-overlay.active { display: flex; }
+  .carrier-call-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem 1.8rem;
+    max-width: 520px;
+    width: 90%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.03);
+  }
+  .carrier-call-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+  }
+  .carrier-call-icon { font-size: 1.6rem; }
+  .carrier-call-from {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .carrier-call-category {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+  .carrier-call-body {
+    color: var(--text);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+  .carrier-call-dismiss {
+    background: var(--accent);
+    border: none;
+    color: #faf8f4;
+    padding: 0.55rem 1.8rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: all 0.15s;
+    display: block;
+    margin: 0 auto;
+  }
+  .carrier-call-dismiss:hover { background: var(--accent2); }
+
+  /* Personal best leaderboard */
+  .personal-best-table {
+    width: 100%;
+    max-width: 550px;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  .personal-best-table th {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    font-weight: 700;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .personal-best-table td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--surface2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+  }
+  .clear-history-link {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 0.3rem;
+    display: inline-block;
+  }
+  .clear-history-link:hover { color: var(--red); }
+
+  /* What-if analysis */
+  .what-if-section {
+    max-width: 550px;
+    width: 100%;
+    text-align: left;
+  }
+  .what-if-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .what-if-item .what-if-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-bottom: 0.15rem;
+  }
+
+  .best-score-line {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    font-style: italic;
+  }
+
+  .sound-toggle {
+    position: fixed;
+    bottom: 0.8rem;
+    right: 0.8rem;
+    z-index: 80;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .sound-toggle:hover { border-color: var(--accent); color: var(--text); }
+
   /* Responsive */
   @media (max-width: 700px) {
     .hud { grid-template-columns: repeat(3, 1fr); }
@@ -601,6 +753,7 @@
       <button class="diff-btn" data-diff="hard">MGA (Hard)</button>
     </div>
   </div>
+  <div id="title-best-score"></div>
   <button class="start-btn" onclick="startGame()">Start Placing</button>
   <div style="color: var(--text-dim); font-size: 0.75rem; max-width: 400px; line-height: 1.4;">
     Keys: <b>1/2/3</b> select carrier &bull; <b>Arrow keys</b> adjust sliders &bull; <b>B</b> bind &bull; <b>D</b> decline &bull; <b>R</b> refer &bull; <b>L</b> loss runs &bull; <b>M</b> market it &bull; <b>Tab</b> cycle sliders &bull; <b>Space/Enter</b> next
@@ -645,8 +798,16 @@
   </div>
 </div>
 
+<!-- SOUND TOGGLE -->
+<button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">Sound: ON</button>
+
 <!-- EVENT BANNER -->
 <div class="event-banner" id="event-banner"></div>
+
+<!-- CARRIER CALL OVERLAY -->
+<div class="carrier-call-overlay" id="carrier-call-overlay">
+  <div class="carrier-call-card" id="carrier-call-card"></div>
+</div>
 
 <!-- GAME OVER SCREEN -->
 <div id="gameover-screen" class="screen"></div>
@@ -1198,7 +1359,8 @@ function renderSubmission(sub) {
 
   card.innerHTML = `
     <div class="submission-header">
-      <div class="insured-name">${sub.name}<span id="risk-hint-slot"></span></div>
+      <div class="insured-name">${sub.name}</div>
+      <div id="risk-hint-slot" style="text-align:center;width:100%"></div>
       <div class="header-badges">
         <span class="badge badge-coverage">${sub.coverage.name}</span>
         ${sub.isSurplus ? '<span class="badge badge-surplus">SURPLUS LINES</span>' : ''}
@@ -1350,6 +1512,7 @@ function renderSubmission(sub) {
 function selectCarrier(idx) {
   const sub = state.currentSubmission;
   if (!sub.carriers[idx].available) return;
+  sfx.selectCarrier();
   state.selectedCarrierIdx = idx;
   document.querySelectorAll('.carrier-card').forEach((el, i) => {
     el.classList.toggle('selected', i === idx);
@@ -1382,7 +1545,10 @@ function updateTimerDisplay() {
   const pctLeft = (t / state.timePerRound) * 100;
   document.getElementById('timer-bar').style.width = pctLeft + '%';
   const timerEl = document.getElementById('hud-timer');
-  if (t < 5) timerEl.style.color = 'var(--red)';
+  if (t < 5) {
+    timerEl.style.color = 'var(--red)';
+    if (t > 0 && Math.abs(t - Math.round(t)) < 0.1) sfx.tick();
+  }
   else if (t < 10) timerEl.style.color = 'var(--orange)';
   else timerEl.style.color = 'var(--orange)';
 }
@@ -1459,6 +1625,7 @@ function getSelectedTerms() {
 
 function handleLossRuns() {
   if (state.lossRunsUsedThisRound) return;
+  sfx.lossRuns();
   state.lossRunsUsedThisRound = true;
   const cost = rand(5, 8);
   state.timeLeft = Math.max(0, state.timeLeft - cost);
@@ -1479,6 +1646,7 @@ function handleLossRuns() {
 
 function handleMarketIt() {
   if (state.marketItUsedThisRound) return;
+  sfx.marketIt();
   state.marketItUsedThisRound = true;
   const cost = rand(8, 10);
   state.timeLeft = Math.max(0, state.timeLeft - cost);
@@ -1533,6 +1701,7 @@ function handleBind() {
   const diff = DIFFICULTY[state.difficulty];
 
   if (state.selectedCarrierIdx < 0) return;
+  sfx.bind();
 
   const selectedCarrier = sub.carriers[state.selectedCarrierIdx];
   const { premium, limit, retention } = getSelectedTerms();
@@ -1613,9 +1782,7 @@ function handleBind() {
       lossAmount = 0;
       lossDesc = 'Claim filed but fell within the retention. The insured absorbed the cost.';
     } else {
-      lossDesc = lossAmount > premium * 3 ? 'Catastrophic loss! This one\'s going to sting.' :
-                 lossAmount > premium * 1.5 ? 'Significant claim. Your loss ratio just took a hit.' :
-                 lossAmount > premium * 0.5 ? 'Moderate claim filed.' : 'Attritional loss. Manageable.';
+      lossDesc = getNamedClaim(sub.coverage.name, sub.name, sub.state.label, lossAmount, premium);
     }
   }
 
@@ -1676,12 +1843,14 @@ function handleBind() {
   // Check for firing
   const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
   if (lr > diff.fireThreshold && state.totalBinds > 3) {
+    sfx.fired();
     state.firedReason = `Your loss ratio hit ${pct(lr)}. The carriers have revoked your binding authority.`;
     endGame();
     return;
   }
 
   const lossStr = lossOccurred && lossAmount > 0 ? lossDesc : (lossOccurred ? lossDesc : '');
+  if (lossOccurred && lossAmount > 0) sfx.claim(); else sfx.cleanBind();
   showFeedback({
     icon: lossOccurred && lossAmount > 0 ? (lossAmount > premium * 2 ? '💀' : '⚠️') : (lossOccurred ? '🛡️' : '✅'),
     title: lossOccurred && lossAmount > 0 ? 'Claim Filed!' : (lossOccurred ? 'Retention Absorbed It' : 'Clean Bind!'),
@@ -1701,6 +1870,7 @@ function handleBind() {
 }
 
 function handleRefer() {
+  sfx.refer();
   stopTimer();
   const sub = state.currentSubmission;
   const { premium } = getSelectedTerms();
@@ -1746,6 +1916,7 @@ function handleRefer() {
 }
 
 function handleDecline() {
+  sfx.decline();
   stopTimer();
   const sub = state.currentSubmission;
 
@@ -1869,8 +2040,10 @@ function startGame() {
   state.marketItUsedThisRound = false;
   initCarrierRelationships();
   initRetailBrokers();
+  usedCarrierCallIndices = [];
 
   document.getElementById('event-banner').classList.remove('active');
+  document.getElementById('carrier-call-overlay').classList.remove('active');
   document.getElementById('lr-warning').classList.remove('active');
   showScreen('game-screen');
   nextRound();
@@ -1884,24 +2057,29 @@ function nextRound() {
     return;
   }
 
-  state.round++;
-  state.lossRunsUsedThisRound = false;
-  state.marketItUsedThisRound = false;
-  maybeTriggerCatEvent();
+  // Show carrier call between rounds (before loading next submission)
+  maybeShowCarrierCall(function() {
+    state.round++;
+    state.lossRunsUsedThisRound = false;
+    state.marketItUsedThisRound = false;
+    maybeTriggerCatEvent();
 
-  // After round 10, 40% chance of a renewal if we have bound risks
-  let sub = null;
-  if (state.round > 10 && state.boundRisks.length > 0 && Math.random() < 0.4) {
-    sub = generateRenewal();
-  }
-  if (!sub) sub = generateSubmission();
-  state.currentSubmission = sub;
-  renderSubmission(sub);
-  updateHUD();
-  startTimer();
+    // After round 10, 40% chance of a renewal if we have bound risks
+    let sub = null;
+    if (state.round > 10 && state.boundRisks.length > 0 && Math.random() < 0.4) {
+      sub = generateRenewal();
+    }
+    if (!sub) sub = generateSubmission();
+    state.currentSubmission = sub;
+    renderSubmission(sub);
+    updateHUD();
+    sfx.nextRound();
+    startTimer();
+  });
 }
 
 function endGame() {
+  if (!state.firedReason) sfx.gameOver();
   stopTimer();
   document.getElementById('event-banner').classList.remove('active');
   document.getElementById('lr-warning').classList.remove('active');
@@ -2020,14 +2198,19 @@ function endGame() {
         ${ach.map(a => `<div class="achievement">${a}</div>`).join('')}
       </div>
     </div>` : ''}
+    ${renderWhatIf()}
+    ${renderPersonalBest()}
     <div class="share-row">
       <button class="share-btn" onclick="doShare()">${navigator.share ? 'Share Results' : 'Download Results'}</button>
       <button class="share-btn share-btn-text" onclick="doCopyText()">Copy Text</button>
     </div>
-    <button class="start-btn" onclick="showScreen('title-screen')">Play Again</button>
+    <button class="start-btn" onclick="showScreen('title-screen'); updateTitleBestScore();">Play Again</button>
   `;
   // Store for share handlers
   state.lastResults = { grade, gradeColor, revenue: state.revenue, lr: pct(lr), cr: pct(cr), binds: state.totalBinds, accuracy: pct(accuracy), difficulty: state.difficulty, fired: !!state.firedReason, achievements: ach };
+
+  // Save score to localStorage
+  saveScore({ grade, revenue: state.revenue, lossRatio: pct(lr), difficulty: state.difficulty, date: new Date().toISOString() });
 
   showScreen('gameover-screen');
 }
@@ -2040,8 +2223,108 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
+// ====== SOUND ======
+let soundEnabled = localStorage.getItem('binding-authority-sound') !== 'off';
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('binding-authority-sound', soundEnabled ? 'on' : 'off');
+  document.getElementById('sound-toggle').textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+}
+document.getElementById('sound-toggle').textContent = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+
+function playTone(freq, duration, type, vol) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = vol || 0.08;
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+const sfx = {
+  bind() {
+    // Satisfying stamp: two quick tones
+    playTone(220, 0.06, 'square', 0.06);
+    setTimeout(() => playTone(330, 0.1, 'square', 0.04), 50);
+  },
+  decline() {
+    // Soft paper crumple: short noise burst
+    playTone(150, 0.08, 'sawtooth', 0.04);
+  },
+  refer() {
+    playTone(440, 0.05, 'sine', 0.04);
+    setTimeout(() => playTone(520, 0.05, 'sine', 0.03), 60);
+  },
+  lossRuns() {
+    // Page flip
+    playTone(800, 0.03, 'triangle', 0.05);
+    setTimeout(() => playTone(600, 0.03, 'triangle', 0.03), 40);
+  },
+  marketIt() {
+    // Phone dial
+    playTone(350, 0.08, 'sine', 0.04);
+    setTimeout(() => playTone(440, 0.08, 'sine', 0.04), 100);
+  },
+  selectCarrier() {
+    playTone(660, 0.03, 'sine', 0.03);
+  },
+  claim() {
+    // Ominous low tone
+    playTone(110, 0.3, 'sawtooth', 0.05);
+    setTimeout(() => playTone(90, 0.3, 'sawtooth', 0.04), 150);
+  },
+  cleanBind() {
+    // Pleasant ascending
+    playTone(440, 0.08, 'sine', 0.04);
+    setTimeout(() => playTone(550, 0.08, 'sine', 0.04), 80);
+    setTimeout(() => playTone(660, 0.1, 'sine', 0.04), 160);
+  },
+  tick() {
+    playTone(1000, 0.015, 'square', 0.02);
+  },
+  fired() {
+    playTone(200, 0.2, 'sawtooth', 0.06);
+    setTimeout(() => playTone(150, 0.3, 'sawtooth', 0.05), 200);
+    setTimeout(() => playTone(100, 0.5, 'sawtooth', 0.04), 400);
+  },
+  carrierCall() {
+    // Phone ring
+    playTone(440, 0.1, 'sine', 0.04);
+    setTimeout(() => playTone(480, 0.1, 'sine', 0.04), 120);
+  },
+  gameOver() {
+    // Slow descending
+    playTone(520, 0.15, 'triangle', 0.04);
+    setTimeout(() => playTone(440, 0.15, 'triangle', 0.04), 180);
+    setTimeout(() => playTone(350, 0.2, 'triangle', 0.04), 360);
+  },
+  nextRound() {
+    playTone(880, 0.02, 'sine', 0.02);
+  }
+};
+
 // ====== KEYBOARD ======
 document.addEventListener('keydown', e => {
+  // Carrier call overlay
+  if (document.getElementById('carrier-call-overlay').classList.contains('active')) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dismissCarrierCall(); }
+    return;
+  }
   // Feedback overlay
   if (document.getElementById('feedback-overlay').classList.contains('active')) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextRound(); }
@@ -2252,6 +2535,366 @@ function copyTextResults(grade, revenue, lr, cr, binds, accuracy, difficulty, fi
     setTimeout(() => { btn.textContent = orig; }, 1500);
   });
 }
+
+// ====== NAMED CLAIMS ======
+const CLAIM_TEMPLATES = {
+  'General Liability': [
+    "Slip-and-fall at {insured}. Plaintiff alleging negligent maintenance. Reserve: {amount}",
+    "Third-party bodily injury — patron struck by falling signage. Reserve: {amount}",
+    "Customer alleges food contamination at {insured} facility in {location}. Reserve: {amount}",
+    "Visitor tripped on uneven flooring at main entrance. Fractured wrist. Reserve: {amount}",
+    "Tenant alleges mold exposure in leased space at {insured}. Reserve: {amount}",
+    "Advertising injury claim — competitor alleges trade dress infringement. Reserve: {amount}",
+    "Delivery driver injured on {insured} premises — inadequate lighting in loading dock. Reserve: {amount}",
+    "Swimming pool drowning incident at {insured}. Wrongful death suit filed. Reserve: {amount}",
+    "Contractor struck by debris on {insured} property in {location}. Reserve: {amount}",
+    "Dog bite incident at {insured} retail location. Reserve: {amount}"
+  ],
+  'Professional Liability (E&O)': [
+    "Client alleges negligent advice led to {amount} in damages. Demand letter received. Reserve: {amount}",
+    "Former client claims failure to identify key contractual risks. Reserve: {amount}",
+    "Errors in financial projections led to client's investment loss. Reserve: {amount}",
+    "Missed filing deadline resulted in client losing legal rights. Reserve: {amount}",
+    "Client alleges failure to procure adequate coverage — E&O on E&O. Reserve: {amount}",
+    "Technology consultant's flawed system design caused client data loss. Reserve: {amount}"
+  ],
+  'Commercial Property': [
+    "Roof collapse at {insured} facility in {location} following severe weather. Adjuster en route. Reserve: {amount}",
+    "Electrical fire — sprinklers contained damage to north wing. Reserve: {amount}",
+    "Burst pipe caused extensive water damage to warehouse inventory. Reserve: {amount}",
+    "Hail damage to multiple buildings at {insured} campus in {location}. Reserve: {amount}",
+    "Vandalism at vacant property — extensive interior damage discovered. Reserve: {amount}",
+    "HVAC failure caused mold throughout third floor offices at {insured}. Reserve: {amount}",
+    "Lightning strike damaged electrical systems and server room at {location} facility. Reserve: {amount}",
+    "Wind-driven rain infiltrated building envelope during nor'easter. Reserve: {amount}"
+  ],
+  "Workers' Compensation": [
+    "Employee back injury during warehouse operations. Surgery anticipated. Reserve: {amount}",
+    "Forklift operator crushed foot — 12 weeks estimated disability. Reserve: {amount}",
+    "Repetitive strain injury claim from assembly line worker. Reserve: {amount}",
+    "Employee fell from scaffolding at job site. Multiple fractures. Reserve: {amount}",
+    "Chemical exposure claim — worker alleges respiratory damage. Reserve: {amount}",
+    "Heat stroke incident during outdoor operations in {location}. Reserve: {amount}"
+  ],
+  'Commercial Auto': [
+    "Fleet vehicle rear-ended a school bus. No injuries reported but litigation expected. Reserve: {amount}",
+    "Company truck caused multi-vehicle pile-up on interstate near {location}. Reserve: {amount}",
+    "Driver ran red light — T-boned passenger vehicle. Serious injuries. Reserve: {amount}",
+    "Tractor-trailer jackknifed on wet highway. Cargo spilled, road closure. Reserve: {amount}",
+    "Delivery van struck pedestrian in crosswalk. Reserve: {amount}",
+    "Fleet vehicle stolen from job site — total loss plus liability exposure. Reserve: {amount}"
+  ],
+  'Cyber Liability': [
+    "Ransomware attack — 50K records exposed. Breach counsel engaged. Reserve: {amount}",
+    "Phishing attack compromised employee credentials. Customer PII exposed. Reserve: {amount}",
+    "Third-party vendor breach affected {insured} client data. Notification costs mounting. Reserve: {amount}",
+    "Business email compromise — fraudulent wire transfer of {amount}. FBI notified.",
+    "DDoS attack took {insured} systems offline for 72 hours. Business interruption claim. Reserve: {amount}",
+    "Insider threat — terminated employee exfiltrated proprietary data. Reserve: {amount}"
+  ],
+  'Directors & Officers (D&O)': [
+    "Shareholder derivative suit alleging breach of fiduciary duty. Reserve: {amount}",
+    "SEC investigation into financial reporting irregularities at {insured}. Reserve: {amount}",
+    "Former officer alleges wrongful termination and retaliation. Reserve: {amount}",
+    "Class action alleging misleading statements in prospectus. Reserve: {amount}",
+    "Board accused of approving excessive executive compensation. Reserve: {amount}"
+  ],
+  'Environmental Liability': [
+    "Groundwater contamination discovered at {insured} facility. EPA investigation initiated. Reserve: {amount}",
+    "Underground storage tank leak at {location} property. Remediation required. Reserve: {amount}",
+    "Neighboring property claims soil contamination from {insured} operations. Reserve: {amount}",
+    "Asbestos discovered during renovation of {insured} building. Abatement costs: {amount}",
+    "Chemical spill during transport from {insured} facility. State environmental agency involved. Reserve: {amount}"
+  ],
+  'Product Liability': [
+    "Consumer injury from defective product. Class action potential. Reserve: {amount}",
+    "Product recall initiated after reports of overheating. Estimated costs: {amount}",
+    "Child injured by product — CPSC investigation opened. Reserve: {amount}",
+    "Allergic reaction to undisclosed ingredient. Multiple claims filed. Reserve: {amount}",
+    "Structural failure of manufactured component caused property damage. Reserve: {amount}"
+  ],
+  'Excess/Umbrella': [
+    "Underlying GL policy exhausted. Excess layer triggered at {amount}.",
+    "Catastrophic auto claim burned through primary. Excess now responding at {amount}.",
+    "Multi-claimant suit exhausted primary limits. Excess exposure estimated at {amount}.",
+    "Wrongful death verdict exceeded primary limits by {amount}. Excess policy responding."
+  ],
+  'Builders Risk': [
+    "Partial structural collapse during construction. Project delayed 3 months. Reserve: {amount}",
+    "Theft of building materials from active construction site in {location}. Reserve: {amount}",
+    "Fire during welding operations destroyed partially completed structure. Reserve: {amount}",
+    "Tornado damaged active construction project. Debris removal and rebuild: {amount}"
+  ],
+  'Inland Marine': [
+    "Equipment theft from job site. Contractor's tools valued at {amount}.",
+    "Transit damage to specialized machinery en route to {location}. Reserve: {amount}",
+    "Mobile crane overturned during repositioning. Total loss. Reserve: {amount}",
+    "Heavy equipment fell through temporary bridge at remote site. Reserve: {amount}"
+  ]
+};
+
+function getNamedClaim(coverageName, insuredName, stateName, lossAmount, premium) {
+  const templates = CLAIM_TEMPLATES[coverageName] || CLAIM_TEMPLATES['General Liability'];
+  const template = pick(templates);
+  return template
+    .replace(/\{insured\}/g, insuredName)
+    .replace(/\{location\}/g, stateName)
+    .replace(/\{amount\}/g, fmt(lossAmount));
+}
+
+// ====== CARRIER PHONE CALLS ======
+const CARRIER_CALL_TEMPLATES = [
+  // Carrier warnings
+  { category: 'Carrier Warning', icon: '☎️', condition: (s) => s.totalPremium > 0 && s.totalLosses / s.totalPremium > 0.5, from: (s) => getActiveCarrierName(s), msg: (s) => `Your loss ratio on our paper is ${pct(s.totalLosses/s.totalPremium)}. One more bad quarter and we're pulling your authority. I need you to tighten up your underwriting.` },
+  { category: 'Carrier Warning', icon: '☎️', condition: (s) => s.badBinds >= 3, from: (s) => getActiveCarrierName(s), msg: (s) => `We've had ${s.badBinds} claims on accounts you bound. That's more than we expected. I'm escalating this to our head of E&S distribution.` },
+  { category: 'Carrier Warning', icon: '☎️', condition: (s) => true, from: () => 'Underwriting VP', msg: (s) => `Just got out of our portfolio review meeting. Your book came up — the loss development on some of these risks is concerning. Let's schedule a call this week.` },
+  { category: 'Carrier Warning', icon: '☎️', condition: (s) => s.totalBinds > 5 && s.totalLosses > s.revenue, from: (s) => getActiveCarrierName(s), msg: (s) => `We ran the numbers on your production for this program. Losses are outpacing premium. If this continues through Q${rand(2,4)}, we're going to have to restructure the arrangement.` },
+  { category: 'Carrier Warning', icon: '☎️', condition: (s) => s.totalPremium > 0 && s.totalLosses / s.totalPremium > 0.4, from: (s) => 'Regional Underwriting Manager', msg: (s) => `I'm seeing some adverse development on your book. That ${getRecentLossCarrier(s)} account is trending worse than reserved. We may need to increase reserves.` },
+
+  // Carrier praise
+  { category: 'Carrier Praise', icon: '📞', condition: (s) => s.goodBinds >= 3, from: (s) => getActiveCarrierName(s), msg: (s) => `Your book with us has been solid — ${s.goodBinds} clean binds. We're expanding your binding authority to include larger limits. Keep this up and we'll talk about better commission tiers.` },
+  { category: 'Carrier Praise', icon: '📞', condition: (s) => s.totalBinds > 4 && s.totalLosses === 0, from: (s) => getActiveCarrierName(s), msg: (s) => `Zero losses on ${s.totalBinds} binds. Impressive. I'm putting your name forward for our preferred wholesale partner program.` },
+  { category: 'Carrier Praise', icon: '📞', condition: (s) => s.revenue > 30000, from: () => 'VP of Distribution', msg: (s) => `Your production is outstanding — ${fmt(s.revenue)} in net revenue. We'd like to discuss giving you access to our new specialty lines program.` },
+  { category: 'Carrier Praise', icon: '📞', condition: (s) => s.goodDeclines > 2, from: (s) => getActiveCarrierName(s), msg: (s) => `I noticed you declined a few submissions that other brokers would have bound. That's the kind of discipline we want. Smart underwriting matters more than volume.` },
+
+  // Retail broker pressure
+  { category: 'Retail Broker Pressure', icon: '📱', condition: (s) => getAngryBroker(s) !== null, from: (s) => getAngryBroker(s), msg: (s) => `I sent you ${getBrokerSubmissions(s)} submissions and you declined most of them. My clients are getting frustrated. If you can't write this business, I'm moving my book to AmWINS.` },
+  { category: 'Retail Broker Pressure', icon: '📱', condition: (s) => s.totalDeclines >= 3, from: (s) => getRandomActiveBroker(s), msg: (s) => `My client is asking why their renewal hasn't been placed yet. You've been sitting on it. I need terms by end of day or I'm going to another wholesaler.` },
+  { category: 'Retail Broker Pressure', icon: '📱', condition: (s) => true, from: (s) => getRandomActiveBroker(s), msg: (s) => `I've got a big account coming your way — ${pick(INSURED_NAMES)}. They're currently with Liberty Mutual but they're non-renewing. It's gonna be competitive. Can you get me terms from at least two markets?` },
+  { category: 'Retail Broker Pressure', icon: '📱', condition: (s) => s.totalDeclines > s.totalBinds, from: (s) => getRandomActiveBroker(s), msg: (s) => `I get that you're being selective, but my hit ratio with you is terrible. My producers are starting to ask why we bother sending you submissions.` },
+  { category: 'Retail Broker Pressure', icon: '📱', condition: (s) => s.totalRefers > 2, from: (s) => getRandomActiveBroker(s), msg: (s) => `Why do you keep referring things to the carrier? I send them to you because you have binding authority. If I wanted to wait two weeks for an answer I'd go to a retail market.` },
+
+  // Market intel
+  { category: 'Market Intel', icon: '🔔', condition: (s) => true, from: () => 'Industry Contact', msg: (s) => `Heads up — ${pick(CARRIERS).name} is pulling back from ${pick(STATES).label} property next quarter. If you have any accounts there, start looking for alternatives now.` },
+  { category: 'Market Intel', icon: '🔔', condition: (s) => true, from: () => 'Broker Network', msg: (s) => `Word on the street: Lloyd's is tightening capacity on ${pick(COVERAGE_TYPES).name}. Expect rate increases of 10-15% at renewal.` },
+  { category: 'Market Intel', icon: '🔔', condition: (s) => s.activeCatEvent, from: () => 'Market Analyst', msg: (s) => `The ${s.activeCatEvent ? s.activeCatEvent.name : 'current market event'} is having broader ripple effects. Reinsurance costs are spiking and carriers are pulling capacity. Expect tighter terms across the board.` },
+  { category: 'Market Intel', icon: '🔔', condition: (s) => true, from: () => 'Colleague', msg: (s) => `Just came from the NAPSLO conference. The mood is cautious — everyone's worried about ${pick(['social inflation', 'nuclear verdicts', 'climate losses', 'cyber frequency', 'reinsurance costs'])}. Rate adequacy is the theme.` },
+  { category: 'Market Intel', icon: '🔔', condition: (s) => true, from: () => 'Underwriter Contact', msg: (s) => `FYI — ${pick(CARRIERS).name} just hired a new head of E&S. They're likely to shake up appetites. Could be an opportunity or a problem depending on your book mix.` },
+
+  // Compliance
+  { category: 'Compliance', icon: '📋', condition: (s) => true, from: () => 'Compliance Officer', msg: (s) => `Just a reminder — your binding authority requires quarterly loss runs by the 15th. Make sure your carriers have submitted their bordereau. We got flagged last quarter.` },
+  { category: 'Compliance', icon: '📋', condition: (s) => true, from: () => 'Surplus Lines Office', msg: (s) => `We need your surplus lines filings for ${pick(STATES.filter(st => st.surplus)).label} updated. The stamping fee deadline is approaching and we're showing ${rand(2,5)} outstanding filings.` },
+  { category: 'Compliance', icon: '📋', condition: (s) => true, from: () => 'Managing Director', msg: (s) => `Our E&O carrier is asking for an updated procedures manual. They want to see documentation of your underwriting guidelines and authority limits. Can you pull that together?` },
+
+  // Competitor intel
+  { category: 'Competitor Intel', icon: '👀', condition: (s) => s.totalDeclines > 0, from: () => pick(['Industry Source', 'Former Colleague', 'Market Contact']), msg: (s) => `Burns & Wilcox just took the ${getRecentDeclinedName(s)} account you declined. They placed it with ${pick(CARRIERS).name} at ${rand(5,15)}% below your quoted terms.` },
+  { category: 'Competitor Intel', icon: '👀', condition: (s) => true, from: () => 'Industry Source', msg: (s) => `Heard that CRC Group is aggressively pricing ${pick(COVERAGE_TYPES).name} in ${pick(STATES).label}. They're buying business to hit their growth targets. Watch your renewals.` },
+  { category: 'Competitor Intel', icon: '👀', condition: (s) => true, from: () => 'Colleague', msg: (s) => `AmWINS just poached two senior brokers from RT Specialty. They're going after the same retail relationships you have. Keep your producers close.` },
+
+  // Renewal pressure
+  { category: 'Renewal Pressure', icon: '🔄', condition: (s) => s.boundRisks.length > 0, from: (s) => getRandomActiveBroker(s), msg: (s) => `The ${s.boundRisks.length > 0 ? s.boundRisks[0].sub.name : 'Gulf Coast Hospitality'} renewal is coming up. The retailer is shopping it if we can't hold rate. I need you to fight for this one.` },
+  { category: 'Renewal Pressure', icon: '🔄', condition: (s) => s.boundRisks.length > 0, from: () => 'Account Manager', msg: (s) => `Just got word that ${s.boundRisks.length > 0 ? s.boundRisks[Math.floor(Math.random()*s.boundRisks.length)].sub.name : 'a key account'} is considering moving to a different wholesaler for their renewal. We need to be proactive with terms.` },
+  { category: 'Renewal Pressure', icon: '🔄', condition: (s) => s.totalBinds > 3, from: (s) => getActiveCarrierName(s), msg: (s) => `Renewal season is heating up. I'm going to need you to prioritize retention on our existing accounts. New business is great, but I can't lose the book we've built.` },
+];
+
+function getActiveCarrierName(s) {
+  const usedCarriers = Object.entries(s.carrierRelationships || {}).filter(([_, r]) => r.binds > 0);
+  if (usedCarriers.length > 0) return usedCarriers[Math.floor(Math.random() * usedCarriers.length)][0].split('(')[0].trim();
+  return pick(CARRIERS).name.split('(')[0].trim();
+}
+function getRecentLossCarrier(s) {
+  const losses = (s.history || []).filter(h => h.action === 'bind' && h.lossOccurred && h.lossAmount > 0);
+  if (losses.length > 0) return losses[losses.length - 1].sub.name;
+  return pick(INSURED_NAMES);
+}
+function getRecentDeclinedName(s) {
+  const declines = (s.history || []).filter(h => h.action === 'decline');
+  if (declines.length > 0) return declines[declines.length - 1].sub.name;
+  return pick(INSURED_NAMES);
+}
+function getAngryBroker(s) {
+  const angry = Object.entries(s.retailBrokers || {}).filter(([_, r]) => r.submissions > 1 && r.declines > r.binds);
+  if (angry.length > 0) return angry[0][0];
+  return null;
+}
+function getBrokerSubmissions(s) {
+  const angry = Object.entries(s.retailBrokers || {}).filter(([_, r]) => r.submissions > 1 && r.declines > r.binds);
+  if (angry.length > 0) return angry[0][1].submissions;
+  return rand(3, 6);
+}
+function getRandomActiveBroker(s) {
+  const active = Object.entries(s.retailBrokers || {}).filter(([_, r]) => r.submissions > 0);
+  if (active.length > 0) return active[Math.floor(Math.random() * active.length)][0];
+  return pick(RETAIL_BROKER_NAMES);
+}
+
+let usedCarrierCallIndices = [];
+
+function maybeShowCarrierCall(onDone) {
+  // Show every 4-5 rounds with some randomness
+  const interval = rand(4, 5);
+  if (state.round < interval || state.round % interval !== 0 || Math.random() < 0.2) {
+    onDone();
+    return;
+  }
+
+  // Find eligible templates
+  const eligible = CARRIER_CALL_TEMPLATES
+    .map((t, i) => ({ ...t, idx: i }))
+    .filter(t => !usedCarrierCallIndices.includes(t.idx) && t.condition(state));
+
+  if (eligible.length === 0) { onDone(); return; }
+
+  const call = pick(eligible);
+  usedCarrierCallIndices.push(call.idx);
+  sfx.carrierCall();
+
+  const overlay = document.getElementById('carrier-call-overlay');
+  const card = document.getElementById('carrier-call-card');
+  const fromName = typeof call.from === 'function' ? call.from(state) : call.from;
+  const message = typeof call.msg === 'function' ? call.msg(state) : call.msg;
+
+  card.innerHTML = `
+    <div class="carrier-call-header">
+      <span class="carrier-call-icon">${call.icon}</span>
+      <span class="carrier-call-from">${fromName}</span>
+    </div>
+    <div class="carrier-call-category">${call.category}</div>
+    <div class="carrier-call-body">"${message}"</div>
+    <button class="carrier-call-dismiss" onclick="dismissCarrierCall()">Got It</button>
+  `;
+  overlay.classList.add('active');
+
+  // Store callback
+  state._carrierCallDone = onDone;
+}
+
+function dismissCarrierCall() {
+  document.getElementById('carrier-call-overlay').classList.remove('active');
+  if (state._carrierCallDone) {
+    const cb = state._carrierCallDone;
+    state._carrierCallDone = null;
+    cb();
+  }
+}
+
+// ====== PERSONAL BEST LEADERBOARD ======
+const SCORES_KEY = 'binding-authority-scores';
+
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem(SCORES_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveScore(entry) {
+  const scores = loadScores();
+  scores.push(entry);
+  scores.sort((a, b) => {
+    const gradeOrder = { 'A+': 0, 'A': 1, 'B+': 2, 'B': 3, 'C': 4, 'D': 5, 'F': 6 };
+    const gDiff = (gradeOrder[a.grade] ?? 7) - (gradeOrder[b.grade] ?? 7);
+    if (gDiff !== 0) return gDiff;
+    return b.revenue - a.revenue;
+  });
+  // Keep top 20
+  localStorage.setItem(SCORES_KEY, JSON.stringify(scores.slice(0, 20)));
+}
+
+function clearScores() {
+  localStorage.removeItem(SCORES_KEY);
+  // Re-render if on gameover
+  const section = document.getElementById('personal-best-section');
+  if (section) section.innerHTML = '';
+  updateTitleBestScore();
+}
+
+function renderPersonalBest() {
+  const scores = loadScores().slice(0, 5);
+  if (scores.length === 0) return '';
+  const diffLabels = { easy: 'Retail', medium: 'Wholesale', hard: 'MGA' };
+  const rows = scores.map(s => {
+    const d = s.date ? new Date(s.date).toLocaleDateString() : '—';
+    return `<tr>
+      <td style="font-weight:700">${s.grade}</td>
+      <td>${fmt(s.revenue)}</td>
+      <td>${s.lossRatio}</td>
+      <td>${diffLabels[s.difficulty] || s.difficulty}</td>
+      <td style="color:var(--text-dim)">${d}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div id="personal-best-section" style="max-width:550px;width:100%">
+      <p style="color:var(--text-dim);font-size:0.75rem;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em;">Your Best Games</p>
+      <table class="personal-best-table">
+        <thead><tr><th>Grade</th><th>Revenue</th><th>Loss Ratio</th><th>Difficulty</th><th>Date</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <span class="clear-history-link" onclick="clearScores()">Clear History</span>
+    </div>`;
+}
+
+function updateTitleBestScore() {
+  const el = document.getElementById('title-best-score');
+  if (!el) return;
+  const scores = loadScores();
+  if (scores.length === 0) { el.innerHTML = ''; return; }
+  const best = scores[0];
+  const diffLabels = { easy: 'Retail', medium: 'Wholesale', hard: 'MGA' };
+  el.innerHTML = `<p class="best-score-line">Best: ${best.grade} on ${diffLabels[best.difficulty] || best.difficulty}</p>`;
+}
+
+// ====== WHAT-IF ANALYSIS ======
+function renderWhatIf() {
+  const binds = state.history.filter(h => h.action === 'bind' && h.lossOccurred && h.lossAmount > 0);
+  const declines = state.history.filter(h => h.action === 'decline');
+  const items = [];
+
+  // Worst bind (highest loss - commission)
+  if (binds.length > 0) {
+    const worst = binds.reduce((a, b) => (b.lossAmount - b.commission) > (a.lossAmount - a.commission) ? b : a);
+    const savedAmount = worst.lossAmount;
+    const roundNum = state.history.indexOf(worst) + 1;
+    items.push({
+      label: 'Worst Bind',
+      text: `If you had declined ${worst.sub.name} in round ${roundNum}, you'd have saved ${fmt(savedAmount)} in losses.`
+    });
+  }
+
+  // Best decline (highest risk score that was declined and would have lost)
+  const goodDeclines = declines.filter(h => h.wouldHaveLost);
+  if (goodDeclines.length > 0) {
+    const best = goodDeclines.reduce((a, b) => b.sub.riskScore > a.sub.riskScore ? b : a);
+    const estimatedLoss = Math.round(best.sub.fairPremium * best.sub.riskScore * 1.5);
+    const roundNum = state.history.indexOf(best) + 1;
+    items.push({
+      label: 'Best Decline',
+      text: `Your decline of ${best.sub.name} in round ${roundNum} dodged an estimated ${fmt(estimatedLoss)} claim.`
+    });
+  }
+
+  // Worst decline (lowest risk score — missed opportunity)
+  const missedOpps = declines.filter(h => h.sub.riskScore < 0.35 && !h.wouldHaveLost);
+  if (missedOpps.length > 0) {
+    const worst = missedOpps.reduce((a, b) => a.sub.riskScore < b.sub.riskScore ? a : b);
+    const missedCommission = Math.round(worst.sub.fairPremium * 0.14);
+    const roundNum = state.history.indexOf(worst) + 1;
+    items.push({
+      label: 'Missed Opportunity',
+      text: `Declining ${worst.sub.name} in round ${roundNum} cost you — it was clean business worth ~${fmt(missedCommission)} in commission.`
+    });
+  }
+
+  // Total losses avoided
+  const avoidedLosses = declines.filter(h => h.wouldHaveLost);
+  if (avoidedLosses.length > 0) {
+    const totalAvoided = avoidedLosses.reduce((sum, h) => sum + Math.round(h.sub.fairPremium * h.sub.riskScore * 1.2), 0);
+    items.push({
+      label: 'Losses Avoided',
+      text: `Your declines collectively dodged an estimated ${fmt(totalAvoided)} in potential claims across ${avoidedLosses.length} submissions.`
+    });
+  }
+
+  if (items.length === 0) return '';
+  // Show 2-3 items
+  const toShow = items.slice(0, 3);
+  return `
+    <div class="what-if-section">
+      <p style="color:var(--text-dim);font-size:0.75rem;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.06em;">What Cost You the Most</p>
+      ${toShow.map(i => `<div class="what-if-item"><div class="what-if-label">${i.label}</div>${i.text}</div>`).join('')}
+    </div>`;
+}
+
+// Show best score on title screen load
+updateTitleBestScore();
 </script>
 </body>
 </html>
