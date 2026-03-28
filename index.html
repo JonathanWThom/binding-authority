@@ -1015,9 +1015,9 @@ let state = {
 };
 
 const DIFFICULTY = {
-  easy:   { time: 40, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 600000 },
-  medium: { time: 28, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 900000 },
-  hard:   { time: 18, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 1300000 }
+  easy:   { time: 48, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 600000 },
+  medium: { time: 36, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 900000 },
+  hard:   { time: 24, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 1300000 }
 };
 
 function getProductionTarget() { return DIFFICULTY[state.difficulty].prodTarget; }
