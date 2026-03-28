@@ -53,7 +53,23 @@ const STATES = [
   { name: "WA", catRisk: 0.7, label: "Washington", surplus: false },
   { name: "NC", catRisk: 1.1, label: "North Carolina", surplus: false },
   { name: "OK", catRisk: 1.3, label: "Oklahoma", surplus: false },
-  { name: "AZ", catRisk: 0.9, label: "Arizona", surplus: false }
+  { name: "AZ", catRisk: 0.9, label: "Arizona", surplus: false },
+  { name: "GA", catRisk: 1.0, label: "Georgia", surplus: false },
+  { name: "PA", catRisk: 0.7, label: "Pennsylvania", surplus: false },
+  { name: "NJ", catRisk: 0.8, label: "New Jersey", surplus: false },
+  { name: "VA", catRisk: 0.8, label: "Virginia", surplus: false },
+  { name: "SC", catRisk: 1.1, label: "South Carolina", surplus: false },
+  { name: "TN", catRisk: 0.9, label: "Tennessee", surplus: false },
+  { name: "MA", catRisk: 0.7, label: "Massachusetts", surplus: false },
+  { name: "MI", catRisk: 0.8, label: "Michigan", surplus: false },
+  { name: "MN", catRisk: 0.7, label: "Minnesota", surplus: false },
+  { name: "AL", catRisk: 1.2, label: "Alabama", surplus: false },
+  { name: "MS", catRisk: 1.3, label: "Mississippi", surplus: false },
+  { name: "NV", catRisk: 0.8, label: "Nevada", surplus: false },
+  { name: "OR", catRisk: 0.7, label: "Oregon", surplus: false },
+  { name: "CT", catRisk: 0.7, label: "Connecticut", surplus: false },
+  { name: "MO", catRisk: 1.0, label: "Missouri", surplus: false },
+  { name: "IN", catRisk: 0.8, label: "Indiana", surplus: false }
 ];
 
 const CARRIERS = [
