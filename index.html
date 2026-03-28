@@ -1253,19 +1253,17 @@ function endGame() {
   const accuracy = state.totalRounds > 0 ? (state.goodBinds + state.goodDeclines) / Math.max(1, state.totalBinds + state.totalDeclines) : 0;
 
   let grade, gradeColor;
+  const prodTarget = getProductionTarget();
+  const metTarget = state.totalPremium >= prodTarget;
+
   if (state.firedReason) {
     grade = 'F'; gradeColor = '#b5242a';
   } else {
     const referPenalty = Math.max(0, state.totalRefers - Math.round(state.totalRounds * 0.25)) * 5;
-    // Penalize low bind rate — a broker who doesn't place business is failing
     const bindRate = state.totalBinds / state.totalRounds;
     const bindPenalty = bindRate < 0.3 ? 40 : (bindRate < 0.5 ? 20 : 0);
-    // Revenue capped at 30 pts (diminishing returns above $30K)
     const revPoints = Math.min(30, state.revenue / 1000) + (state.revenue > 30000 ? Math.min(15, (state.revenue - 30000) / 5000) : 0);
     const score = revPoints + (accuracy * 50) - (lr * 120) - (cr > 1 ? 30 : 0) - referPenalty - bindPenalty;
-    // Production target: did you write enough premium?
-    const prodTarget = getProductionTarget();
-    const metTarget = state.totalPremium >= prodTarget;
     const prodPenalty = metTarget ? 0 : 15;
 
     const finalScore = score - prodPenalty;
