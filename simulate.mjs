@@ -111,9 +111,9 @@ const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
 const RETENTION_OPTIONS = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
 
 const DIFFICULTY = {
-  easy:   { time: 48, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 600000 },
-  medium: { time: 36, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 900000 },
-  hard:   { time: 24, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 1300000 }
+  easy:   { time: 60, timeFloor: 50, rounds: 12, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 480000 },
+  medium: { time: 50, timeFloor: 40, rounds: 15, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 700000 },
+  hard:   { time: 40, timeFloor: 30, rounds: 20, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 950000 }
 };
 
 const PRIOR_CARRIERS = ["Zurich", "Hartford", "CNA", "Travelers", "Liberty Mutual", "None — new venture", "Declined to disclose", "None — non-renewed"];

@@ -1015,22 +1015,21 @@ let state = {
 };
 
 const DIFFICULTY = {
-  easy:   { time: 48, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 600000 },
-  medium: { time: 36, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 900000 },
-  hard:   { time: 24, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 1300000 }
+  easy:   { time: 60, timeFloor: 50, rounds: 12, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 480000 },
+  medium: { time: 50, timeFloor: 40, rounds: 15, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 700000 },
+  hard:   { time: 40, timeFloor: 30, rounds: 20, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 950000 }
 };
 
 function getProductionTarget() { return DIFFICULTY[state.difficulty].prodTarget; }
 
-// Timer compression: starts at base time, drops to ~70% by final rounds
+// Timer compression: full time for first 60% of rounds, then linearly compress to floor
 function getTimeForRound(round) {
   const diff = DIFFICULTY[state.difficulty];
   const totalRounds = diff.rounds;
-  const progress = (round - 1) / (totalRounds - 1); // 0 to 1
-  // First 60% of rounds: full time. Last 40%: compress to 70%
+  const progress = (round - 1) / (totalRounds - 1);
   if (progress < 0.6) return diff.time;
-  const compressionProgress = (progress - 0.6) / 0.4; // 0 to 1 within the last 40%
-  return Math.round(diff.time * (1 - compressionProgress * 0.3));
+  const compressionProgress = (progress - 0.6) / 0.4;
+  return Math.round(diff.time - compressionProgress * (diff.time - diff.timeFloor));
 }
 
 // ====== UTILITY ======
@@ -2096,7 +2095,9 @@ function nextRound() {
 
     // After round 10, 40% chance of a renewal if we have bound risks
     let sub = null;
-    if (state.round > 10 && state.boundRisks.length > 0 && Math.random() < 0.4) {
+    // Renewals start after 60% of the game
+    const renewalStart = Math.ceil(DIFFICULTY[state.difficulty].rounds * 0.6);
+    if (state.round > renewalStart && state.boundRisks.length > 0 && Math.random() < 0.4) {
       sub = generateRenewal();
     }
     if (!sub) sub = generateSubmission();
