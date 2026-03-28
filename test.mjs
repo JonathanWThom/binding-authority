@@ -9,6 +9,8 @@ import { readFileSync } from 'fs';
 
 // ====== Extract game data from index.html ======
 const html = readFileSync('index.html', 'utf8');
+const css = readFileSync('css/style.css', 'utf8');
+const htmlAndCss = html + '\n' + css; // combined for class checks
 const jsMatch = html.match(/<script>([\s\S]*?)<\/script>/);
 if (!jsMatch) { console.error('No script found in index.html'); process.exit(1); }
 
@@ -363,7 +365,7 @@ const requiredClasses = [
   '.event-banner.active', '.lr-warning.active', '.banner-active'
 ];
 for (const cls of requiredClasses) {
-  assert(html.includes(cls), `CSS class ${cls} defined`);
+  assert(htmlAndCss.includes(cls), `CSS class ${cls} defined`);
 }
 
 // ====== SUMMARY ======
