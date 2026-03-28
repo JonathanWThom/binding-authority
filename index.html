@@ -2094,7 +2094,10 @@ function endGame() {
     grade = 'F'; gradeColor = '#b5242a';
   } else {
     const referPenalty = Math.max(0, state.totalRefers - Math.round(state.totalRounds * 0.25)) * 5;
-    const score = state.revenue / 1000 + (accuracy * 50) - (lr * 100) - (cr > 1 ? 30 : 0) - referPenalty;
+    // Penalize low bind rate — a broker who doesn't place business is failing
+    const bindRate = state.totalBinds / state.totalRounds;
+    const bindPenalty = bindRate < 0.3 ? 40 : (bindRate < 0.5 ? 20 : 0);
+    const score = state.revenue / 1000 + (accuracy * 50) - (lr * 100) - (cr > 1 ? 30 : 0) - referPenalty - bindPenalty;
     if (score > 60) { grade = 'A+'; gradeColor = '#2d6a4f'; }
     else if (score > 40) { grade = 'A'; gradeColor = '#2d6a4f'; }
     else if (score > 25) { grade = 'B+'; gradeColor = '#3d5a80'; }
