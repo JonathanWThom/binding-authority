@@ -1,0 +1,32 @@
+export const STATES = [
+  { name: "FL", catRisk: 1.5, label: "Florida", surplus: true },
+  { name: "CA", catRisk: 1.3, label: "California", surplus: true },
+  { name: "TX", catRisk: 1.2, label: "Texas", surplus: false },
+  { name: "LA", catRisk: 1.4, label: "Louisiana", surplus: true },
+  { name: "NY", catRisk: 0.8, label: "New York", surplus: true },
+  { name: "IL", catRisk: 0.9, label: "Illinois", surplus: false },
+  { name: "OH", catRisk: 0.7, label: "Ohio", surplus: false },
+  { name: "CO", catRisk: 0.8, label: "Colorado", surplus: false },
+  { name: "WA", catRisk: 0.7, label: "Washington", surplus: false },
+  { name: "NC", catRisk: 1.1, label: "North Carolina", surplus: false },
+  { name: "OK", catRisk: 1.3, label: "Oklahoma", surplus: false },
+  { name: "AZ", catRisk: 0.9, label: "Arizona", surplus: false },
+  { name: "GA", catRisk: 1.0, label: "Georgia", surplus: false },
+  { name: "PA", catRisk: 0.7, label: "Pennsylvania", surplus: false },
+  { name: "NJ", catRisk: 0.8, label: "New Jersey", surplus: false },
+  { name: "VA", catRisk: 0.8, label: "Virginia", surplus: false },
+  { name: "SC", catRisk: 1.1, label: "South Carolina", surplus: false },
+  { name: "TN", catRisk: 0.9, label: "Tennessee", surplus: false },
+  { name: "MA", catRisk: 0.7, label: "Massachusetts", surplus: false },
+  { name: "MI", catRisk: 0.8, label: "Michigan", surplus: false },
+  { name: "MN", catRisk: 0.7, label: "Minnesota", surplus: false },
+  { name: "AL", catRisk: 1.2, label: "Alabama", surplus: false },
+  { name: "MS", catRisk: 1.3, label: "Mississippi", surplus: false },
+  { name: "NV", catRisk: 0.8, label: "Nevada", surplus: false },
+  { name: "OR", catRisk: 0.7, label: "Oregon", surplus: false },
+  { name: "CT", catRisk: 0.7, label: "Connecticut", surplus: false },
+  { name: "MO", catRisk: 1.0, label: "Missouri", surplus: false },
+  { name: "IN", catRisk: 0.8, label: "Indiana", surplus: false }
+];
+
+export const SL_TAX_RATES = { FL: 0.05, CA: 0.03, NY: 0.035, LA: 0.04 };

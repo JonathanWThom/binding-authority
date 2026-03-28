@@ -5,134 +5,17 @@
  * bugs, edge cases, and insurance realism issues.
  */
 
-// ====== GAME DATA (copied from index.html) ======
-const COVERAGE_TYPES = [
-  { name: "General Liability", baseRate: 0.005, abbr: "GL", industries: null },
-  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O", industries: ["Healthcare", "Technology", "Professional Services", "Real Estate"] },
-  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP", industries: null },
-  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS", industries: null },
-  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA", industries: ["Construction", "Manufacturing", "Transportation", "Energy / Oil & Gas", "Agriculture", "Food & Beverage", "Mining", "Retail"] },
-  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC", industries: null },
-  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber", industries: ["Technology", "Healthcare", "Professional Services", "Real Estate", "Retail", "Hospitality", "Food & Beverage", "Entertainment / Events"] },
-  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O", industries: ["Technology", "Healthcare", "Professional Services", "Cannabis", "Energy / Oil & Gas", "Real Estate"] },
-  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro", industries: ["Construction", "Manufacturing", "Energy / Oil & Gas", "Mining", "Agriculture", "Transportation"] },
-  { name: "Product Liability", baseRate: 0.008, abbr: "PL", industries: ["Manufacturing", "Food & Beverage", "Cannabis", "Agriculture", "Retail"] },
-  { name: "Inland Marine", baseRate: 0.005, abbr: "IM", industries: ["Construction", "Manufacturing", "Transportation", "Marine", "Energy / Oil & Gas", "Mining", "Agriculture"] },
-  { name: "Builders Risk", baseRate: 0.006, abbr: "BR", industries: ["Construction", "Real Estate"] }
-];
+// ====== GAME DATA (imported from shared modules) ======
+import { COVERAGE_TYPES } from './js/data/coverage.js';
+import { INDUSTRIES } from './js/data/industries.js';
+import { STATES } from './js/data/states.js';
+import { CARRIERS } from './js/data/carriers.js';
+import { RED_FLAGS, GREEN_FLAGS } from './js/data/flags.js';
+import { CAT_EVENTS } from './js/data/events.js';
+import { DIFFICULTY, LIMIT_OPTIONS, RETENTION_OPTIONS } from './js/data/difficulty.js';
+import { INSURED_NAMES } from './js/data/names.js';
 
-const INDUSTRIES = [
-  { name: "Construction", riskMod: 1.4, class: "artisan" },
-  { name: "Manufacturing", riskMod: 1.2, class: "industrial" },
-  { name: "Hospitality", riskMod: 1.1, class: "service" },
-  { name: "Healthcare", riskMod: 1.3, class: "professional" },
-  { name: "Technology", riskMod: 0.8, class: "professional" },
-  { name: "Real Estate", riskMod: 0.9, class: "property" },
-  { name: "Transportation", riskMod: 1.5, class: "fleet" },
-  { name: "Energy / Oil & Gas", riskMod: 1.6, class: "industrial" },
-  { name: "Cannabis", riskMod: 1.8, class: "specialty" },
-  { name: "Agriculture", riskMod: 1.2, class: "specialty" },
-  { name: "Entertainment / Events", riskMod: 1.3, class: "service" },
-  { name: "Marine", riskMod: 1.4, class: "specialty" },
-  { name: "Aviation", riskMod: 1.7, class: "specialty" },
-  { name: "Mining", riskMod: 1.6, class: "industrial" },
-  { name: "Food & Beverage", riskMod: 1.0, class: "service" },
-  { name: "Retail", riskMod: 0.7, class: "service" },
-  { name: "Professional Services", riskMod: 0.6, class: "professional" }
-];
-
-const STATES = [
-  { name: "FL", catRisk: 1.5, label: "Florida", surplus: true },
-  { name: "CA", catRisk: 1.3, label: "California", surplus: true },
-  { name: "TX", catRisk: 1.2, label: "Texas", surplus: false },
-  { name: "LA", catRisk: 1.4, label: "Louisiana", surplus: true },
-  { name: "NY", catRisk: 0.8, label: "New York", surplus: true },
-  { name: "IL", catRisk: 0.9, label: "Illinois", surplus: false },
-  { name: "OH", catRisk: 0.7, label: "Ohio", surplus: false },
-  { name: "CO", catRisk: 0.8, label: "Colorado", surplus: false },
-  { name: "WA", catRisk: 0.7, label: "Washington", surplus: false },
-  { name: "NC", catRisk: 1.1, label: "North Carolina", surplus: false },
-  { name: "OK", catRisk: 1.3, label: "Oklahoma", surplus: false },
-  { name: "AZ", catRisk: 0.9, label: "Arizona", surplus: false },
-  { name: "GA", catRisk: 1.0, label: "Georgia", surplus: false },
-  { name: "PA", catRisk: 0.7, label: "Pennsylvania", surplus: false },
-  { name: "NJ", catRisk: 0.8, label: "New Jersey", surplus: false },
-  { name: "VA", catRisk: 0.8, label: "Virginia", surplus: false },
-  { name: "SC", catRisk: 1.1, label: "South Carolina", surplus: false },
-  { name: "TN", catRisk: 0.9, label: "Tennessee", surplus: false },
-  { name: "MA", catRisk: 0.7, label: "Massachusetts", surplus: false },
-  { name: "MI", catRisk: 0.8, label: "Michigan", surplus: false },
-  { name: "MN", catRisk: 0.7, label: "Minnesota", surplus: false },
-  { name: "AL", catRisk: 1.2, label: "Alabama", surplus: false },
-  { name: "MS", catRisk: 1.3, label: "Mississippi", surplus: false },
-  { name: "NV", catRisk: 0.8, label: "Nevada", surplus: false },
-  { name: "OR", catRisk: 0.7, label: "Oregon", surplus: false },
-  { name: "CT", catRisk: 0.7, label: "Connecticut", surplus: false },
-  { name: "MO", catRisk: 1.0, label: "Missouri", surplus: false },
-  { name: "IN", catRisk: 0.8, label: "Indiana", surplus: false }
-];
-
-const CARRIERS = [
-  { name: "Markel Specialty", rating: "A", commission: 0.15, appetite: { specialty: 2, industrial: 1, professional: 1, service: 1, property: 0, fleet: 0, artisan: 1 }, maxTIV: 15000000, minPremium: 10000 },
-  { name: "Lexington (AIG)", rating: "A+", commission: 0.12, appetite: { specialty: 1, industrial: 2, professional: 2, service: 2, property: 2, fleet: 1, artisan: 1 }, maxTIV: 50000000, minPremium: 25000 },
-  { name: "Scottsdale (Nationwide)", rating: "A+", commission: 0.14, appetite: { specialty: 0, industrial: 1, professional: 1, service: 2, property: 1, fleet: 1, artisan: 2 }, maxTIV: 20000000, minPremium: 5000 },
-  { name: "Lloyd's Syndicate 2003", rating: "A", commission: 0.10, appetite: { specialty: 2, industrial: 2, professional: 1, service: 0, property: 2, fleet: 2, artisan: 0 }, maxTIV: 100000000, minPremium: 50000 },
-  { name: "Kinsale Capital", rating: "A", commission: 0.16, appetite: { specialty: 1, industrial: 1, professional: 0, service: 2, property: 1, fleet: 0, artisan: 2 }, maxTIV: 10000000, minPremium: 5000 },
-  { name: "USLI (Berkshire)", rating: "A++", commission: 0.11, appetite: { specialty: 0, industrial: 0, professional: 2, service: 2, property: 1, fleet: 0, artisan: 1 }, maxTIV: 8000000, minPremium: 3000 },
-  { name: "Colony (Argo)", rating: "A-", commission: 0.17, appetite: { specialty: 1, industrial: 2, professional: 0, service: 1, property: 2, fleet: 2, artisan: 1 }, maxTIV: 25000000, minPremium: 15000 },
-  { name: "Nautilus (Berkley)", rating: "A+", commission: 0.13, appetite: { specialty: 2, industrial: 1, professional: 2, service: 1, property: 0, fleet: 1, artisan: 0 }, maxTIV: 30000000, minPremium: 20000 },
-  { name: "Evanston (Markel)", rating: "A", commission: 0.15, appetite: { specialty: 1, industrial: 0, professional: 1, service: 2, property: 2, fleet: 0, artisan: 2 }, maxTIV: 12000000, minPremium: 5000 },
-  { name: "StarStone (Enstar)", rating: "A-", commission: 0.18, appetite: { specialty: 2, industrial: 2, professional: 0, service: 0, property: 1, fleet: 2, artisan: 1 }, maxTIV: 40000000, minPremium: 30000 }
-];
-
-const RED_FLAGS = [
-  "Prior carrier non-renewed for frequency", "3 large claims in last 5 years",
-  "Ongoing litigation against the insured", "OSHA violations last 12 months",
-  "Failed last fire inspection", "CEO under federal investigation",
-  "Operating without required permits", "Previous arson investigation (inconclusive)",
-  "Significant accounts receivable aging >90 days", "Key employee turnover >40% annually",
-  "No formal safety program in place", "Located in flood zone, no flood policy",
-  "Material misrepresentation on prior application", "Retroactive date gap in E&O coverage",
-  "Unlicensed subcontractors on projects", "Multiple DOT violations",
-  "Delinquent premium payments with prior carrier", "Cyber breach in last 24 months, no remediation plan",
-  "Product recall in last 3 years", "Environmental cleanup order pending",
-  "Bankruptcy filing in last 7 years", "Owner has personal liens exceeding $500K",
-  "Declined by 3+ carriers this cycle", "Incomplete loss runs provided",
-  "Prior fraud allegation (unresolved)"
-];
-
-const GREEN_FLAGS = [
-  "Loss-free for 5+ years", "Dedicated risk management team", "ISO 9001 certified",
-  "Long-standing carrier relationships", "Strong financials (A+ Dun & Bradstreet)",
-  "Comprehensive safety training program", "Sprinklered building with central alarm",
-  "No prior claims in this line of coverage", "SOC 2 Type II certified",
-  "Board-level risk committee", "Formal incident response plan in place",
-  "Unionized workforce with low turnover", "Recently upgraded all electrical/plumbing systems",
-  "Multi-year retention with current carrier", "Fleet equipped with telematics and dashcams"
-];
-
-const CAT_EVENTS = [
-  { name: "Hurricane Warning", states: ["FL", "LA", "TX", "NC"], lines: ["Commercial Property", "Builders Risk"], premiumMod: 1.5, lossChanceMod: 2.0 },
-  { name: "Wildfire Season", states: ["CA", "CO", "WA", "AZ"], lines: ["Commercial Property", "Inland Marine"], premiumMod: 1.4, lossChanceMod: 1.8 },
-  { name: "Cyber Attack Wave", states: null, lines: ["Cyber Liability", "Professional Liability (E&O)"], premiumMod: 1.3, lossChanceMod: 1.6 },
-  { name: "Tort Reform Reversal", states: null, lines: ["General Liability", "Product Liability", "Professional Liability (E&O)"], premiumMod: 1.2, lossChanceMod: 1.4 },
-  { name: "Tornado Outbreak", states: ["OK", "TX", "IL", "OH"], lines: ["Commercial Property"], premiumMod: 1.6, lossChanceMod: 2.2 },
-  { name: "Nuclear Verdict Trend", states: null, lines: ["Commercial Auto", "General Liability", "Excess/Umbrella"], premiumMod: 1.3, lossChanceMod: 1.5 },
-  { name: "Pandemic Resurgence", states: null, lines: ["Workers' Compensation", "Directors & Officers (D&O)"], premiumMod: 1.2, lossChanceMod: 1.3 },
-  { name: "Social Inflation Spike", states: null, lines: ["General Liability", "Commercial Auto", "Product Liability"], premiumMod: 1.25, lossChanceMod: 1.4 },
-  { name: "Reinsurance Treaty Collapse", states: null, lines: ["Excess/Umbrella", "Commercial Property"], premiumMod: 1.7, lossChanceMod: 1.3 }
-];
-
-const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
-const RETENTION_OPTIONS = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
-
-const DIFFICULTY = {
-  easy:   { time: 60, timeFloor: 50, rounds: 12, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 400000 },
-  medium: { time: 50, timeFloor: 40, rounds: 15, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 550000 },
-  hard:   { time: 40, timeFloor: 30, rounds: 20, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 800000 }
-};
-
-const PRIOR_CARRIERS = ["Zurich", "Hartford", "CNA", "Travelers", "Liberty Mutual", "None — new venture", "Declined to disclose", "None — non-renewed"];
+const PRIOR_CARRIERS = ["Zurich", "Hartford", "CNA", "Travelers", "Liberty Mutual", "Chubb", "AIG (admitted)", "Nationwide", "The Hanover", "Cincinnati Financial", "EMC Insurance", "Employers Holdings", "None — new venture", "Declined to disclose", "None — non-renewed"];
 
 // ====== UTILITY ======
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }

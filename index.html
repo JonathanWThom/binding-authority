@@ -86,198 +86,21 @@
 <!-- GAME OVER SCREEN -->
 <div id="gameover-screen" class="screen"></div>
 
-<script>
-// ====== DATA ======
-const INSURED_NAMES = [
-  "Gulf Coast Hospitality Group", "Apex Manufacturing LLC", "Redwood Timber Co.",
-  "Pinnacle Construction Inc.", "Harbor View Marina", "Lone Star Energy Partners",
-  "Summit Healthcare Systems", "Pacific Rim Imports", "Cascade Adventure Tours",
-  "Metro Transit Authority", "Ironclad Security Services", "Brightfield Solar Farms",
-  "Northwind Logistics", "Tidal Wave Surf Co.", "Greystone Property Holdings",
-  "Falcon Air Charter", "Blue Ridge Distillery", "Coral Bay Resorts",
-  "Thunderbolt Electric", "Prairie Land Ag Solutions", "Skyline Tower Management",
-  "Riverbend Cannabis Co.", "Atlas Heavy Industries", "Sapphire Coast Fishing Fleet",
-  "Canyon Rock Quarry", "Velvet Rope Nightclubs", "Pioneer Oilfield Services",
-  "Emerald City Tech Hub", "Silver Creek Ranch", "Obsidian Data Centers",
-  "Wildfire BBQ Chain", "Glacier Point Ski Resort", "Sandcastle Beach Properties",
-  "Pegasus Air Cargo", "Golden Gate Vineyards", "Rust Belt Recycling",
-  "Neptune Deep Sea Mining", "Crimson Tide Marine Transport", "High Voltage Studios",
-  "Sunrise Senior Living", "Brickyard Auto Racing", "Cloud Nine Aviation",
-  "Desert Rose Cannabis Farms", "Whitewater Rafting Adventures", "Iron Horse Railway Tours"
-];
+<script type="module">
+// ====== DATA (imported from js/data/) ======
+import { INSURED_NAMES, RETAIL_BROKER_NAMES } from './js/data/names.js';
+import { COVERAGE_TYPES } from './js/data/coverage.js';
+import { INDUSTRIES } from './js/data/industries.js';
+import { STATES, SL_TAX_RATES } from './js/data/states.js';
+import { CARRIERS, NONSTANDARD_CARRIERS } from './js/data/carriers.js';
+import { RED_FLAGS, GREEN_FLAGS } from './js/data/flags.js';
+import { CAT_EVENTS } from './js/data/events.js';
+import { CLAIM_TEMPLATES } from './js/data/claims.js';
+// CARRIER_CALL_TEMPLATES stays inline — has function deps on game helpers
+import { DIFFICULTY, LIMIT_OPTIONS, RETENTION_OPTIONS } from './js/data/difficulty.js';
 
-const COVERAGE_TYPES = [
-  { name: "General Liability", baseRate: 0.005, abbr: "GL", exposureLabel: "Revenue", industries: null },
-  { name: "Professional Liability (E&O)", baseRate: 0.008, abbr: "E&O", exposureLabel: "Revenue", industries: ["Healthcare", "Technology", "Professional Services", "Real Estate"] },
-  { name: "Commercial Property", baseRate: 0.004, abbr: "CPP", exposureLabel: "TIV", industries: null },
-  { name: "Excess/Umbrella", baseRate: 0.003, abbr: "XS", exposureLabel: "Underlying Premium", industries: null },
-  { name: "Commercial Auto", baseRate: 0.006, abbr: "CA", exposureLabel: "Fleet Value", industries: ["Construction", "Manufacturing", "Transportation", "Energy / Oil & Gas", "Agriculture", "Food & Beverage", "Mining", "Retail"] },
-  { name: "Workers' Compensation", baseRate: 0.007, abbr: "WC", exposureLabel: "Annual Payroll", industries: null },
-  { name: "Cyber Liability", baseRate: 0.01, abbr: "Cyber", exposureLabel: "Revenue", industries: ["Technology", "Healthcare", "Professional Services", "Real Estate", "Retail", "Hospitality", "Food & Beverage", "Entertainment / Events"] },
-  { name: "Directors & Officers (D&O)", baseRate: 0.009, abbr: "D&O", exposureLabel: "Total Assets", industries: ["Technology", "Healthcare", "Professional Services", "Cannabis", "Energy / Oil & Gas", "Real Estate"] },
-  { name: "Environmental Liability", baseRate: 0.012, abbr: "Enviro", exposureLabel: "TIV", industries: ["Construction", "Manufacturing", "Energy / Oil & Gas", "Mining", "Agriculture", "Transportation"] },
-  { name: "Product Liability", baseRate: 0.008, abbr: "PL", exposureLabel: "Revenue", industries: ["Manufacturing", "Food & Beverage", "Cannabis", "Agriculture", "Retail"] },
-  { name: "Inland Marine", baseRate: 0.005, abbr: "IM", exposureLabel: "TIV", industries: ["Construction", "Manufacturing", "Transportation", "Marine", "Energy / Oil & Gas", "Mining", "Agriculture"] },
-  { name: "Builders Risk", baseRate: 0.006, abbr: "BR", exposureLabel: "Project Value", industries: ["Construction", "Real Estate"] }
-];
-
-const INDUSTRIES = [
-  { name: "Construction", riskMod: 1.4, class: "artisan" },
-  { name: "Manufacturing", riskMod: 1.2, class: "industrial" },
-  { name: "Hospitality", riskMod: 1.1, class: "service" },
-  { name: "Healthcare", riskMod: 1.3, class: "professional" },
-  { name: "Technology", riskMod: 0.8, class: "professional" },
-  { name: "Real Estate", riskMod: 0.9, class: "property" },
-  { name: "Transportation", riskMod: 1.5, class: "fleet" },
-  { name: "Energy / Oil & Gas", riskMod: 1.6, class: "industrial" },
-  { name: "Cannabis", riskMod: 1.8, class: "specialty" },
-  { name: "Agriculture", riskMod: 1.2, class: "specialty" },
-  { name: "Entertainment / Events", riskMod: 1.3, class: "service" },
-  { name: "Marine", riskMod: 1.4, class: "specialty" },
-  { name: "Aviation", riskMod: 1.7, class: "specialty" },
-  { name: "Mining", riskMod: 1.6, class: "industrial" },
-  { name: "Food & Beverage", riskMod: 1.0, class: "service" },
-  { name: "Retail", riskMod: 0.7, class: "service" },
-  { name: "Professional Services", riskMod: 0.6, class: "professional" }
-];
-
-const STATES = [
-  { name: "FL", catRisk: 1.5, label: "Florida", surplus: true },
-  { name: "CA", catRisk: 1.3, label: "California", surplus: true },
-  { name: "TX", catRisk: 1.2, label: "Texas", surplus: false },
-  { name: "LA", catRisk: 1.4, label: "Louisiana", surplus: true },
-  { name: "NY", catRisk: 0.8, label: "New York", surplus: true },
-  { name: "IL", catRisk: 0.9, label: "Illinois", surplus: false },
-  { name: "OH", catRisk: 0.7, label: "Ohio", surplus: false },
-  { name: "CO", catRisk: 0.8, label: "Colorado", surplus: false },
-  { name: "WA", catRisk: 0.7, label: "Washington", surplus: false },
-  { name: "NC", catRisk: 1.1, label: "North Carolina", surplus: false },
-  { name: "OK", catRisk: 1.3, label: "Oklahoma", surplus: false },
-  { name: "AZ", catRisk: 0.9, label: "Arizona", surplus: false },
-  { name: "GA", catRisk: 1.0, label: "Georgia", surplus: false },
-  { name: "PA", catRisk: 0.7, label: "Pennsylvania", surplus: false },
-  { name: "NJ", catRisk: 0.8, label: "New Jersey", surplus: false },
-  { name: "VA", catRisk: 0.8, label: "Virginia", surplus: false },
-  { name: "SC", catRisk: 1.1, label: "South Carolina", surplus: false },
-  { name: "TN", catRisk: 0.9, label: "Tennessee", surplus: false },
-  { name: "MA", catRisk: 0.7, label: "Massachusetts", surplus: false },
-  { name: "MI", catRisk: 0.8, label: "Michigan", surplus: false },
-  { name: "MN", catRisk: 0.7, label: "Minnesota", surplus: false },
-  { name: "AL", catRisk: 1.2, label: "Alabama", surplus: false },
-  { name: "MS", catRisk: 1.3, label: "Mississippi", surplus: false },
-  { name: "NV", catRisk: 0.8, label: "Nevada", surplus: false },
-  { name: "OR", catRisk: 0.7, label: "Oregon", surplus: false },
-  { name: "CT", catRisk: 0.7, label: "Connecticut", surplus: false },
-  { name: "MO", catRisk: 1.0, label: "Missouri", surplus: false },
-  { name: "IN", catRisk: 0.8, label: "Indiana", surplus: false }
-];
-
-const CARRIERS = [
-  { name: "Markel Specialty", rating: "A", commission: 0.15, appetite: { specialty: 2, industrial: 1, professional: 1, service: 1, property: 0, fleet: 0, artisan: 1 }, maxTIV: 15000000, minPremium: 10000 },
-  { name: "Lexington (AIG)", rating: "A+", commission: 0.12, appetite: { specialty: 1, industrial: 2, professional: 2, service: 2, property: 2, fleet: 1, artisan: 1 }, maxTIV: 50000000, minPremium: 25000 },
-  { name: "Scottsdale (Nationwide)", rating: "A+", commission: 0.14, appetite: { specialty: 0, industrial: 1, professional: 1, service: 2, property: 1, fleet: 1, artisan: 2 }, maxTIV: 20000000, minPremium: 5000 },
-  { name: "Lloyd's Syndicate 2003", rating: "A", commission: 0.10, appetite: { specialty: 2, industrial: 2, professional: 1, service: 0, property: 2, fleet: 2, artisan: 0 }, maxTIV: 100000000, minPremium: 50000 },
-  { name: "Kinsale Capital", rating: "A", commission: 0.16, appetite: { specialty: 1, industrial: 1, professional: 0, service: 2, property: 1, fleet: 0, artisan: 2 }, maxTIV: 10000000, minPremium: 5000 },
-  { name: "USLI (Berkshire)", rating: "A++", commission: 0.11, appetite: { specialty: 0, industrial: 0, professional: 2, service: 2, property: 1, fleet: 0, artisan: 1 }, maxTIV: 8000000, minPremium: 3000 },
-  { name: "Colony (Argo)", rating: "A-", commission: 0.17, appetite: { specialty: 1, industrial: 2, professional: 0, service: 1, property: 2, fleet: 2, artisan: 1 }, maxTIV: 25000000, minPremium: 15000 },
-  { name: "Nautilus (Berkley)", rating: "A+", commission: 0.13, appetite: { specialty: 2, industrial: 1, professional: 2, service: 1, property: 0, fleet: 1, artisan: 0 }, maxTIV: 30000000, minPremium: 20000 },
-  { name: "Evanston (Markel)", rating: "A", commission: 0.15, appetite: { specialty: 1, industrial: 0, professional: 1, service: 2, property: 2, fleet: 0, artisan: 2 }, maxTIV: 12000000, minPremium: 5000 },
-  { name: "StarStone (Enstar)", rating: "A-", commission: 0.18, appetite: { specialty: 2, industrial: 2, professional: 0, service: 0, property: 1, fleet: 2, artisan: 1 }, maxTIV: 40000000, minPremium: 30000 }
-];
-
-const RED_FLAGS = [
-  "Prior carrier non-renewed for frequency",
-  "3 large claims in last 5 years",
-  "Ongoing litigation against the insured",
-  "OSHA violations last 12 months",
-  "Failed last fire inspection",
-  "CEO under federal investigation",
-  "Operating without required permits",
-  "Previous arson investigation (inconclusive)",
-  "Significant accounts receivable aging >90 days",
-  "Key employee turnover >40% annually",
-  "No formal safety program in place",
-  "Located in flood zone, no flood policy",
-  "Material misrepresentation on prior application",
-  "Retroactive date gap in E&O coverage",
-  "Unlicensed subcontractors on projects",
-  "Multiple DOT violations",
-  "Delinquent premium payments with prior carrier",
-  "Cyber breach in last 24 months, no remediation plan",
-  "Product recall in last 3 years",
-  "Environmental cleanup order pending",
-  "Bankruptcy filing in last 7 years",
-  "Owner has personal liens exceeding $500K",
-  "Declined by 3+ carriers this cycle",
-  "Incomplete loss runs provided",
-  "Prior fraud allegation (unresolved)"
-];
-
-const GREEN_FLAGS = [
-  "Loss-free for 5+ years",
-  "Dedicated risk management team",
-  "ISO 9001 certified",
-  "Long-standing carrier relationships",
-  "Strong financials (A+ Dun & Bradstreet)",
-  "Comprehensive safety training program",
-  "Sprinklered building with central alarm",
-  "No prior claims in this line of coverage",
-  "SOC 2 Type II certified",
-  "Board-level risk committee",
-  "Formal incident response plan in place",
-  "Unionized workforce with low turnover",
-  "Recently upgraded all electrical/plumbing systems",
-  "Multi-year retention with current carrier",
-  "Fleet equipped with telematics and dashcams",
-  "Annual third-party safety audit — no findings",
-  "Written business continuity and disaster recovery plan",
-  "Management team has 20+ years industry experience",
-  "Contractual risk transfer program with all subs",
-  "Active loss prevention program with quarterly reviews",
-  "LEED-certified building with modern fire suppression",
-  "Independent board members with insurance/risk backgrounds",
-  "Premium payment history: always current",
-  "Comprehensive cyber hygiene program with annual pen testing",
-  "Clean MVR records across entire fleet"
-];
-
-const CAT_EVENTS = [
-  { name: "Hurricane Warning", states: ["FL", "LA", "TX", "NC"], lines: ["Commercial Property", "Builders Risk"], premiumMod: 1.5, lossChanceMod: 2.0 },
-  { name: "Wildfire Season", states: ["CA", "CO", "WA", "AZ"], lines: ["Commercial Property", "Inland Marine"], premiumMod: 1.4, lossChanceMod: 1.8 },
-  { name: "Cyber Attack Wave", states: null, lines: ["Cyber Liability", "Professional Liability (E&O)"], premiumMod: 1.3, lossChanceMod: 1.6 },
-  { name: "Tort Reform Reversal", states: null, lines: ["General Liability", "Product Liability", "Professional Liability (E&O)"], premiumMod: 1.2, lossChanceMod: 1.4 },
-  { name: "Tornado Outbreak", states: ["OK", "TX", "IL", "OH"], lines: ["Commercial Property"], premiumMod: 1.6, lossChanceMod: 2.2 },
-  { name: "Nuclear Verdict Trend", states: null, lines: ["Commercial Auto", "General Liability", "Excess/Umbrella"], premiumMod: 1.3, lossChanceMod: 1.5 },
-  { name: "Pandemic Resurgence", states: null, lines: ["Workers' Compensation", "Directors & Officers (D&O)"], premiumMod: 1.2, lossChanceMod: 1.3 },
-  { name: "Social Inflation Spike", states: null, lines: ["General Liability", "Commercial Auto", "Product Liability"], premiumMod: 1.25, lossChanceMod: 1.4 },
-  { name: "Reinsurance Treaty Collapse", states: null, lines: ["Excess/Umbrella", "Commercial Property"], premiumMod: 1.7, lossChanceMod: 1.3 }
-];
-
-const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
-const RETENTION_OPTIONS = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
-
-const SL_TAX_RATES = { FL: 0.05, CA: 0.03, NY: 0.035, LA: 0.04 };
-
-const RETAIL_BROKER_NAMES = [
-  "Meridian Risk Group", "Crestline Insurance", "Broadstone Agency",
-  "Harborview Partners", "Ridgeline Brokers", "Cornerstone Risk",
-  "Clearwater Insurance", "Summit Partners", "Ironbridge Agency",
-  "Pinehurst Risk Advisors", "Redfield & Associates", "Keystone Brokerage",
-  "Lakewood Insurance Group", "Ashford Risk Services", "Briarcliff Agency"
-];
-
-const NONSTANDARD_CARRIERS = [
-  { name: "Surplus Specialty Group", rating: "B++", commission: 0.08 },
-  { name: "Coastal Underwriters", rating: "B+", commission: 0.07 },
-  { name: "Allied Risk Partners", rating: "A-", commission: 0.09 },
-  { name: "Frontier E&S Markets", rating: "B++", commission: 0.08 },
-  { name: "Beacon Specialty Insurance", rating: "B+", commission: 0.07 },
-  { name: "Meridian Surplus Lines", rating: "B++", commission: 0.08 },
-  { name: "Palomar Specialty", rating: "A-", commission: 0.09 },
-  { name: "Westport Insurance", rating: "B+", commission: 0.07 },
-  { name: "Capitol Indemnity", rating: "B++", commission: 0.08 },
-  { name: "Torus Specialty", rating: "B+", commission: 0.07 }
-];
+// Functions referenced from HTML onclick handlers must be on window
+// (module scope is not global). These are attached after definition below.
 
 // ====== GAME STATE ======
 let state = {
@@ -1897,102 +1720,9 @@ function copyTextResults(grade, revenue, lr, cr, binds, accuracy, difficulty, fi
   });
 }
 
-// ====== NAMED CLAIMS ======
-const CLAIM_TEMPLATES = {
-  'General Liability': [
-    "Slip-and-fall at {insured}. Plaintiff alleging negligent maintenance. Reserve: {amount}",
-    "Third-party bodily injury — patron struck by falling signage. Reserve: {amount}",
-    "Customer alleges food contamination at {insured} facility in {location}. Reserve: {amount}",
-    "Visitor tripped on uneven flooring at main entrance. Fractured wrist. Reserve: {amount}",
-    "Tenant alleges mold exposure in leased space at {insured}. Reserve: {amount}",
-    "Advertising injury claim — competitor alleges trade dress infringement. Reserve: {amount}",
-    "Delivery driver injured on {insured} premises — inadequate lighting in loading dock. Reserve: {amount}",
-    "Swimming pool drowning incident at {insured}. Wrongful death suit filed. Reserve: {amount}",
-    "Contractor struck by debris on {insured} property in {location}. Reserve: {amount}",
-    "Dog bite incident at {insured} retail location. Reserve: {amount}"
-  ],
-  'Professional Liability (E&O)': [
-    "Client alleges negligent advice led to {amount} in damages. Demand letter received. Reserve: {amount}",
-    "Former client claims failure to identify key contractual risks. Reserve: {amount}",
-    "Errors in financial projections led to client's investment loss. Reserve: {amount}",
-    "Missed filing deadline resulted in client losing legal rights. Reserve: {amount}",
-    "Client alleges failure to procure adequate coverage — E&O on E&O. Reserve: {amount}",
-    "Technology consultant's flawed system design caused client data loss. Reserve: {amount}"
-  ],
-  'Commercial Property': [
-    "Roof collapse at {insured} facility in {location} following severe weather. Adjuster en route. Reserve: {amount}",
-    "Electrical fire — sprinklers contained damage to north wing. Reserve: {amount}",
-    "Burst pipe caused extensive water damage to warehouse inventory. Reserve: {amount}",
-    "Hail damage to multiple buildings at {insured} campus in {location}. Reserve: {amount}",
-    "Vandalism at vacant property — extensive interior damage discovered. Reserve: {amount}",
-    "HVAC failure caused mold throughout third floor offices at {insured}. Reserve: {amount}",
-    "Lightning strike damaged electrical systems and server room at {location} facility. Reserve: {amount}",
-    "Wind-driven rain infiltrated building envelope during nor'easter. Reserve: {amount}"
-  ],
-  "Workers' Compensation": [
-    "Employee back injury during warehouse operations. Surgery anticipated. Reserve: {amount}",
-    "Forklift operator crushed foot — 12 weeks estimated disability. Reserve: {amount}",
-    "Repetitive strain injury claim from assembly line worker. Reserve: {amount}",
-    "Employee fell from scaffolding at job site. Multiple fractures. Reserve: {amount}",
-    "Chemical exposure claim — worker alleges respiratory damage. Reserve: {amount}",
-    "Heat stroke incident during outdoor operations in {location}. Reserve: {amount}"
-  ],
-  'Commercial Auto': [
-    "Fleet vehicle rear-ended a school bus. No injuries reported but litigation expected. Reserve: {amount}",
-    "Company truck caused multi-vehicle pile-up on interstate near {location}. Reserve: {amount}",
-    "Driver ran red light — T-boned passenger vehicle. Serious injuries. Reserve: {amount}",
-    "Tractor-trailer jackknifed on wet highway. Cargo spilled, road closure. Reserve: {amount}",
-    "Delivery van struck pedestrian in crosswalk. Reserve: {amount}",
-    "Fleet vehicle stolen from job site — total loss plus liability exposure. Reserve: {amount}"
-  ],
-  'Cyber Liability': [
-    "Ransomware attack — 50K records exposed. Breach counsel engaged. Reserve: {amount}",
-    "Phishing attack compromised employee credentials. Customer PII exposed. Reserve: {amount}",
-    "Third-party vendor breach affected {insured} client data. Notification costs mounting. Reserve: {amount}",
-    "Business email compromise — fraudulent wire transfer of {amount}. FBI notified.",
-    "DDoS attack took {insured} systems offline for 72 hours. Business interruption claim. Reserve: {amount}",
-    "Insider threat — terminated employee exfiltrated proprietary data. Reserve: {amount}"
-  ],
-  'Directors & Officers (D&O)': [
-    "Shareholder derivative suit alleging breach of fiduciary duty. Reserve: {amount}",
-    "SEC investigation into financial reporting irregularities at {insured}. Reserve: {amount}",
-    "Former officer alleges wrongful termination and retaliation. Reserve: {amount}",
-    "Class action alleging misleading statements in prospectus. Reserve: {amount}",
-    "Board accused of approving excessive executive compensation. Reserve: {amount}"
-  ],
-  'Environmental Liability': [
-    "Groundwater contamination discovered at {insured} facility. EPA investigation initiated. Reserve: {amount}",
-    "Underground storage tank leak at {location} property. Remediation required. Reserve: {amount}",
-    "Neighboring property claims soil contamination from {insured} operations. Reserve: {amount}",
-    "Asbestos discovered during renovation of {insured} building. Abatement costs: {amount}",
-    "Chemical spill during transport from {insured} facility. State environmental agency involved. Reserve: {amount}"
-  ],
-  'Product Liability': [
-    "Consumer injury from defective product. Class action potential. Reserve: {amount}",
-    "Product recall initiated after reports of overheating. Estimated costs: {amount}",
-    "Child injured by product — CPSC investigation opened. Reserve: {amount}",
-    "Allergic reaction to undisclosed ingredient. Multiple claims filed. Reserve: {amount}",
-    "Structural failure of manufactured component caused property damage. Reserve: {amount}"
-  ],
-  'Excess/Umbrella': [
-    "Underlying GL policy exhausted. Excess layer triggered at {amount}.",
-    "Catastrophic auto claim burned through primary. Excess now responding at {amount}.",
-    "Multi-claimant suit exhausted primary limits. Excess exposure estimated at {amount}.",
-    "Wrongful death verdict exceeded primary limits by {amount}. Excess policy responding."
-  ],
-  'Builders Risk': [
-    "Partial structural collapse during construction. Project delayed 3 months. Reserve: {amount}",
-    "Theft of building materials from active construction site in {location}. Reserve: {amount}",
-    "Fire during welding operations destroyed partially completed structure. Reserve: {amount}",
-    "Tornado damaged active construction project. Debris removal and rebuild: {amount}"
-  ],
-  'Inland Marine': [
-    "Equipment theft from job site. Contractor's tools valued at {amount}.",
-    "Transit damage to specialized machinery en route to {location}. Reserve: {amount}",
-    "Mobile crane overturned during repositioning. Total loss. Reserve: {amount}",
-    "Heavy equipment fell through temporary bridge at remote site. Reserve: {amount}"
-  ]
-};
+// ====== NAMED CLAIMS (data imported from js/data/claims.js) ======
+// CLAIM_TEMPLATES imported from js/data/claims.js
+
 
 function getNamedClaim(coverageName, insuredName, stateName, lossAmount, premium) {
   const templates = CLAIM_TEMPLATES[coverageName] || CLAIM_TEMPLATES['General Liability'];
@@ -2256,6 +1986,24 @@ function renderWhatIf() {
 
 // Show best score on title screen load
 updateTitleBestScore();
+
+// ====== EXPOSE TO WINDOW (for onclick handlers in HTML) ======
+window.startGame = startGame;
+window.handleBind = handleBind;
+window.handleDecline = handleDecline;
+window.handleRefer = handleRefer;
+window.handleLossRuns = handleLossRuns;
+window.handleMarketIt = handleMarketIt;
+window.selectCarrier = selectCarrier;
+window.toggleSound = toggleSound;
+window.showScreen = showScreen;
+window.nextRound = nextRound;
+window.doShare = doShare;
+window.doCopyText = doCopyText;
+window.closeFeedback = closeFeedback;
+window.dismissCarrierCall = dismissCarrierCall;
+window.clearScores = clearScores;
+window.updateTitleBestScore = updateTitleBestScore;
 </script>
 </body>
 </html>

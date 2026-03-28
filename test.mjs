@@ -11,11 +11,13 @@ import { readFileSync } from 'fs';
 const html = readFileSync('index.html', 'utf8');
 const css = readFileSync('css/style.css', 'utf8');
 const htmlAndCss = html + '\n' + css; // combined for class checks
-const jsMatch = html.match(/<script>([\s\S]*?)<\/script>/);
+const jsMatch = html.match(/<script[^>]*>([\s\S]*?)<\/script>/);
 if (!jsMatch) { console.error('No script found in index.html'); process.exit(1); }
 
 // Validate JS syntax
-try { new Function(jsMatch[1]); } catch(e) {
+// Strip import/export statements for syntax check (new Function doesn't support modules)
+const jsForSyntax = jsMatch[1].replace(/^import .*/gm, '').replace(/^export /gm, '');
+try { new Function(jsForSyntax); } catch(e) {
   console.error('JS SYNTAX ERROR:', e.message);
   process.exit(1);
 }
@@ -31,26 +33,33 @@ const extractCode = jsMatch[1]
   .replace(/URL\.revokeObjectURL[^;]*/g, '""');
 
 // We can't fully eval the game code due to DOM deps, so let's extract the data constants directly
+// Read all JS sources: inline script + data modules
+const allDataSources = [jsMatch[1]];
+import { readdirSync } from 'fs';
+for (const f of readdirSync('js/data')) {
+  if (f.endsWith('.js')) allDataSources.push(readFileSync('js/data/' + f, 'utf8'));
+}
+const allJS = allDataSources.join('\n');
+
 function extractArray(name) {
-  const re = new RegExp(`const ${name}\\s*=\\s*(\\[[\\s\\S]*?\\]);`);
-  const m = jsMatch[1].match(re);
+  const re = new RegExp(`(?:export )?const ${name}\\s*=\\s*(\\[[\\s\\S]*?\\]);`);
+  const m = allJS.match(re);
   if (!m) return null;
   try { return eval(m[1]); } catch(e) { return null; }
 }
 
 function extractObject(name) {
-  // Match the object — handle nested braces by counting
-  const startRe = new RegExp(`const ${name}\\s*=\\s*\\{`);
-  const startMatch = startRe.exec(jsMatch[1]);
+  const startRe = new RegExp(`(?:export )?const ${name}\\s*=\\s*\\{`);
+  const startMatch = startRe.exec(allJS);
   if (!startMatch) return null;
   let depth = 1;
   let i = startMatch.index + startMatch[0].length;
-  while (depth > 0 && i < jsMatch[1].length) {
-    if (jsMatch[1][i] === '{') depth++;
-    if (jsMatch[1][i] === '}') depth--;
+  while (depth > 0 && i < allJS.length) {
+    if (allJS[i] === '{') depth++;
+    if (allJS[i] === '}') depth--;
     i++;
   }
-  const objStr = jsMatch[1].slice(startMatch.index + startMatch[0].length - 1, i);
+  const objStr = allJS.slice(startMatch.index + startMatch[0].length - 1, i);
   try { return eval('(' + objStr + ')'); } catch(e) { return null; }
 }
 
