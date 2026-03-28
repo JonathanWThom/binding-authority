@@ -111,9 +111,9 @@ const LIMIT_OPTIONS = [500000, 1000000, 2000000, 5000000, 10000000];
 const RETENTION_OPTIONS = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000];
 
 const DIFFICULTY = {
-  easy:   { time: 40, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80 },
-  medium: { time: 28, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70 },
-  hard:   { time: 18, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60 }
+  easy:   { time: 40, rounds: 15, lossChance: 0.45, overpriceThreshold: 1.6, fireThreshold: 0.80, prodTarget: 600000 },
+  medium: { time: 28, rounds: 20, lossChance: 0.60, overpriceThreshold: 1.35, fireThreshold: 0.70, prodTarget: 900000 },
+  hard:   { time: 18, rounds: 25, lossChance: 0.75, overpriceThreshold: 1.2, fireThreshold: 0.60, prodTarget: 1300000 }
 };
 
 const PRIOR_CARRIERS = ["Zurich", "Hartford", "CNA", "Travelers", "Liberty Mutual", "None — new venture", "Declined to disclose", "None — non-renewed"];
@@ -772,12 +772,17 @@ function computeGrade(gs, totalRounds) {
   const revPoints = Math.min(30, gs.revenue / 1000) + (gs.revenue > 30000 ? Math.min(15, (gs.revenue - 30000) / 5000) : 0);
   const score = revPoints + (accuracy * 50) - (lr * 120) - (cr > 1 ? 30 : 0) - referPenalty - bindPenalty;
 
-  if (score > 60) return 'A+';
-  if (score > 40) return 'A';
-  if (score > 25) return 'B+';
-  if (score > 10) return 'B';
-  if (score > 0) return 'C';
-  if (score > -15) return 'D';
+  // Production target penalty
+  const prodTarget = DIFFICULTY[Object.keys(DIFFICULTY).find(k => DIFFICULTY[k].rounds === totalRounds) || 'medium'].prodTarget;
+  const prodPenalty = gs.totalPremium >= prodTarget ? 0 : 15;
+  const finalScore = score - prodPenalty;
+
+  if (finalScore > 75) return 'A+';
+  if (finalScore > 55) return 'A';
+  if (finalScore > 35) return 'B+';
+  if (finalScore > 15) return 'B';
+  if (finalScore > 0) return 'C';
+  if (finalScore > -15) return 'D';
   return 'F';
 }
 
