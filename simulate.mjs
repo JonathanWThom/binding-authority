@@ -1071,5 +1071,32 @@ console.log('\n--- STATUS ---');
 console.log('  Implemented: SL tax, renewals, loss runs, carrier declination context, retail broker tracking, market-it, financing flag');
 console.log('  Not yet implemented: subjectivities, layered programs, commission negotiation, premium financing mechanics');
 
+// ====== EXIT CODE ======
+// Hard failures that should break CI
+let simFailed = false;
+for (const check of gradeChecks) {
+  if (check.startsWith('⚠') && (
+    check.includes('always_decline got B or better') ||
+    check.includes('always_refer got B or better') ||
+    check.includes('fired players did NOT get F')
+  )) {
+    simFailed = true;
+  }
+}
+for (const v of verdicts) {
+  if (v.startsWith('⚠') && (
+    v.includes('outside typical middle-market') ||
+    v.includes('outside normal E&S range')
+  )) {
+    simFailed = true;
+  }
+}
+
 console.log('\n' + '='.repeat(80));
-console.log('Simulation complete.');
+if (simFailed) {
+  console.log('Simulation FAILED — hard checks did not pass.');
+  process.exit(1);
+} else {
+  console.log('Simulation complete — all hard checks passed.');
+  process.exit(0);
+}
