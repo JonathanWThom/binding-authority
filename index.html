@@ -499,6 +499,7 @@
     text-transform: uppercase;
   }
   .event-banner.active { transform: translateY(0); }
+  #game-screen.banner-active { padding-top: 2.8rem; }
 
   /* ---- GAME OVER ---- */
   #gameover-screen {
@@ -1625,6 +1626,7 @@ function maybeTriggerCatEvent() {
     if (state.catEventRoundsLeft === 0) {
       state.activeCatEvent = null;
       document.getElementById('event-banner').classList.remove('active');
+      document.getElementById('game-screen').classList.remove('banner-active');
     }
     return;
   }
@@ -1635,6 +1637,7 @@ function maybeTriggerCatEvent() {
     const stateStr = state.activeCatEvent.states ? ` (${state.activeCatEvent.states.join(', ')})` : ' (All states)';
     banner.textContent = `Market Event: ${state.activeCatEvent.name}${stateStr} — Rates hardening!`;
     banner.classList.add('active');
+    document.getElementById('game-screen').classList.add('banner-active');
   }
 }
 
@@ -2069,6 +2072,7 @@ function startGame() {
   usedCarrierCallIndices = [];
 
   document.getElementById('event-banner').classList.remove('active');
+  document.getElementById('game-screen').classList.remove('banner-active');
   document.getElementById('carrier-call-overlay').classList.remove('active');
   document.getElementById('lr-warning').classList.remove('active');
   showScreen('game-screen');
@@ -2124,6 +2128,7 @@ function endGame() {
   if (!state.firedReason) sfx.gameOver();
   stopTimer();
   document.getElementById('event-banner').classList.remove('active');
+  document.getElementById('game-screen').classList.remove('banner-active');
   document.getElementById('lr-warning').classList.remove('active');
 
   const lr = state.totalPremium > 0 ? state.totalLosses / state.totalPremium : 0;
